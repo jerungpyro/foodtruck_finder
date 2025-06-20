@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -31,10 +28,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -59,4 +53,24 @@ class DefaultFirebaseOptions {
     projectId: 'foodtruckfinderapp-d38e8',
     storageBucket: 'foodtruckfinderapp-d38e8.firebasestorage.app',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyDBE_xjpQB_H7sedgTEjCYZpWY_jaUwKQY',
+    appId: '1:12996768905:ios:41fe310da7201961ec8258',
+    messagingSenderId: '12996768905',
+    projectId: 'foodtruckfinderapp-d38e8',
+    storageBucket: 'foodtruckfinderapp-d38e8.firebasestorage.app',
+    iosBundleId: 'com.example.foodtruckFinder',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyAJsKptOZPAkejgHkMqySJTnEQfPq0oR1I',
+    appId: '1:12996768905:web:fa870f093786bf38ec8258',
+    messagingSenderId: '12996768905',
+    projectId: 'foodtruckfinderapp-d38e8',
+    authDomain: 'foodtruckfinderapp-d38e8.firebaseapp.com',
+    storageBucket: 'foodtruckfinderapp-d38e8.firebasestorage.app',
+    measurementId: 'G-0NT4T90VQS',
+  );
+
 }

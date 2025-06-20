@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../models/food_truck_model.dart';
+import '../models/food_truck_model.dart'; // Ensure this model is updated
 import 'profile_screen.dart';
 
 class MapScreen extends StatefulWidget {
@@ -23,24 +23,21 @@ class _MapScreenState extends State<MapScreen> {
   LatLng _currentMapPosition = _defaultInitialPosition;
 
   bool _isLoadingLocation = true;
-  // _isLoadingFoodTrucks might still be useful for the *initial* load indication from the stream
-  // or can be implicitly handled by StreamBuilder's ConnectionState.waiting
-  // Let's keep it for now for consistency with the overall loading indicator.
   bool _isLoadingFoodTrucks = true;
 
   final Set<Marker> _markers = {};
-  StreamSubscription? _foodTrucksSubscription; // To manage the stream subscription
+  StreamSubscription? _foodTrucksSubscription;
 
   @override
   void initState() {
     super.initState();
-    _listenToFoodTruckUpdates(); // Changed from one-time fetch
+    _listenToFoodTruckUpdates();
     _getUserLocationAndCenterMap();
   }
 
   @override
   void dispose() {
-    _foodTrucksSubscription?.cancel(); // Cancel subscription when widget is disposed
+    _foodTrucksSubscription?.cancel();
     super.dispose();
   }
 
@@ -48,31 +45,29 @@ class _MapScreenState extends State<MapScreen> {
     print("[MapScreen] Subscribing to food truck updates...");
     if (mounted) {
       setState(() {
-        _isLoadingFoodTrucks = true; // Indicate loading for the initial stream data
+        _isLoadingFoodTrucks = true;
       });
     }
 
     _foodTrucksSubscription = FirebaseFirestore.instance
         .collection('foodTrucks')
-        // Optional: Add .where('isVerified', isEqualTo: true) if you have such a field
-        // and only want to display verified trucks from the main stream.
+        // Consider adding .where('isVerified', isEqualTo: true) if you only want verified trucks
         .snapshots()
         .listen((QuerySnapshot snapshot) {
       print("[MapScreen] Received food truck data snapshot. Docs: ${snapshot.docs.length}");
       List<FoodTruck> fetchedTrucks = [];
       if (snapshot.docs.isNotEmpty) {
         fetchedTrucks = snapshot.docs
-            .map((doc) => FoodTruck.fromFirestore(doc))
+            .map((doc) => FoodTruck.fromFirestore(doc)) // This will call the print in model
             .toList();
       } else {
         print("[MapScreen] No food trucks found in snapshot.");
-        // Optionally show a message if needed, but stream will keep listening
       }
-      _createMarkersFromData(fetchedTrucks); // Update markers with new data
+      _createMarkersFromData(fetchedTrucks);
 
       if (mounted) {
         setState(() {
-          _isLoadingFoodTrucks = false; // Stop loading indicator after first data arrives
+          _isLoadingFoodTrucks = false;
         });
       }
     }, onError: (error) {
@@ -83,13 +78,11 @@ class _MapScreenState extends State<MapScreen> {
                 'Error loading food trucks in real-time: ${error.toString().substring(0, (error.toString().length > 100) ? 100 : error.toString().length)}...')));
         setState(() {
           _isLoadingFoodTrucks = false;
-          _markers.clear(); // Clear markers on error if desired
+          _markers.clear();
         });
       }
     });
   }
-
-  // _fetchFoodTrucksAndCreateMarkers() is now replaced by _listenToFoodTruckUpdates()
 
   void _createMarkersFromData(List<FoodTruck> trucks) {
     Set<Marker> tempMarkers = {};
@@ -101,7 +94,7 @@ class _MapScreenState extends State<MapScreen> {
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
           infoWindow: InfoWindow(
             title: truck.name,
-            snippet: 'Type: ${truck.type}',
+            snippet: 'Type: ${truck.type}. Tap for details.', // Updated snippet
           ),
           onTap: () {
             _showFoodTruckDetailsBottomSheet(truck);
@@ -112,17 +105,27 @@ class _MapScreenState extends State<MapScreen> {
 
     if (mounted) {
       setState(() {
-        _markers.clear(); // Clear old markers
-        _markers.addAll(tempMarkers); // Add new/updated markers
+        _markers.clear();
+        _markers.addAll(tempMarkers);
       });
     }
   }
 
   void _showFoodTruckDetailsBottomSheet(FoodTruck truck) {
-    // ... (this method remains the same)
+    // Debugging print statement
+    print("--- BottomSheet for Truck ID: ${truck.id} ---");
+    print("Truck Name: ${truck.name}");
+    print("Truck ReportedBy field (from truck object): '${truck.reportedBy}'");
+    print("Truck Last Reported Date: ${truck.lastReported}");
+    print("Truck Location Description: ${truck.locationDescription}");
+    // End of Debugging
+
+    String formattedDateTime =
+        "${truck.lastReported.toLocal().day.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().month.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().year} at ${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')}";
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).cardColor, // Use theme card color
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
@@ -131,9 +134,6 @@ class _MapScreenState extends State<MapScreen> {
         ),
       ),
       builder: (context) {
-        String formattedDateTime =
-            "${truck.lastReported.toLocal().day.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().month.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().year} at ${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')}";
-
         return Padding(
           padding: EdgeInsets.only(
             top: 20.0,
@@ -147,15 +147,16 @@ class _MapScreenState extends State<MapScreen> {
             children: <Widget>[
               Text(
                 truck.name,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
               ),
               const SizedBox(height: 16),
               _buildDetailRow(Icons.category_outlined, "Type", truck.type),
-              _buildDetailRow(Icons.person_pin_circle_outlined, "Reported by", truck.reportedBy),
+              if (truck.locationDescription != null && truck.locationDescription!.isNotEmpty)
+                 _buildDetailRow(Icons.description_outlined, "Description", truck.locationDescription!),
+              _buildDetailRow(Icons.person_pin_circle_outlined, "Reported by", truck.reportedBy), // This is what's displayed
               _buildDetailRow(Icons.timer_outlined, "Last Reported", formattedDateTime),
               const SizedBox(height: 24),
               Align(
@@ -178,7 +179,6 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildDetailRow(IconData icon, String label, String value) {
-    // ... (this method remains the same)
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -206,11 +206,8 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _getUserLocationAndCenterMap() async {
-    // ... (this method remains the same)
     if (!mounted) return;
-    setState(() {
-      _isLoadingLocation = true;
-    });
+    setState(() { _isLoadingLocation = true; });
 
     bool serviceEnabled;
     LocationPermission permission;
@@ -218,12 +215,8 @@ class _MapScreenState extends State<MapScreen> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Location services are disabled. Please enable them.')));
-        setState(() {
-          _currentMapPosition = _defaultInitialPosition;
-          _isLoadingLocation = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location services are disabled. Please enable them.')));
+        setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
       }
       if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
       return;
@@ -234,12 +227,8 @@ class _MapScreenState extends State<MapScreen> {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Location permissions are denied.')));
-          setState(() {
-            _currentMapPosition = _defaultInitialPosition;
-            _isLoadingLocation = false;
-          });
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location permissions are denied.')));
+          setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
         }
         if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
         return;
@@ -248,20 +237,15 @@ class _MapScreenState extends State<MapScreen> {
 
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Location permissions are permanently denied.')));
-        setState(() {
-          _currentMapPosition = _defaultInitialPosition;
-          _isLoadingLocation = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location permissions are permanently denied.')));
+        setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
       }
       if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
       return;
     }
 
     try {
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       if (mounted) {
         setState(() {
           _currentMapPosition = LatLng(position.latitude, position.longitude);
@@ -272,19 +256,14 @@ class _MapScreenState extends State<MapScreen> {
     } catch (e) {
       print("[MapScreen] Error getting location: $e");
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Error getting location: $e')));
-        setState(() {
-          _currentMapPosition = _defaultInitialPosition;
-          _isLoadingLocation = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error getting location: $e')));
+        setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
       }
       if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
     }
   }
 
   Future<void> _animateToPosition(LatLng position) async {
-    // ... (this method remains the same)
     final GoogleMapController controller = await _controllerCompleter.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(target: position, zoom: 15.0),
@@ -293,8 +272,6 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // The FloatingActionButton no longer needs to call _fetchFoodTrucksAndCreateMarkers
-    // as data updates automatically. It can just be for centering the user's location.
     bool isOverallLoading = _isLoadingLocation || (_isLoadingFoodTrucks && _markers.isEmpty);
 
     return Scaffold(
@@ -329,12 +306,12 @@ class _MapScreenState extends State<MapScreen> {
               target: _currentMapPosition,
               zoom: 11.0,
             ),
-            markers: _markers, // These will update based on the stream
+            markers: _markers,
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
           ),
-          if (isOverallLoading) // Handles initial loading of location and first batch of trucks
+          if (isOverallLoading)
             const Center(
               child: CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
@@ -343,11 +320,11 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getUserLocationAndCenterMap, // Now only centers user location
-        tooltip: 'My Location', // Updated tooltip
+        onPressed: _getUserLocationAndCenterMap,
+        tooltip: 'My Location',
         backgroundColor: Theme.of(context).colorScheme.secondary,
         foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        child: _isLoadingLocation // Show progress only if fetching user location
+        child: _isLoadingLocation
             ? const SizedBox(
                 width: 24,
                 height: 24,
@@ -356,7 +333,7 @@ class _MapScreenState extends State<MapScreen> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Icon(Icons.my_location), // Changed icon back
+            : const Icon(Icons.my_location),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
