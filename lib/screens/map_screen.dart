@@ -1,12 +1,16 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+// No longer need url_launcher here if bottom sheet handles it
+// import 'package:url_launcher/url_launcher.dart'; 
 
-import '../models/food_truck_model.dart'; // Ensure this model is updated for all fields
+import '../models/food_truck_model.dart';
 import 'profile_screen.dart';
+// Import the new custom widgets
+import '../widgets/map_screen_widgets/food_truck_details_bottom_sheet.dart';
+import '../widgets/map_screen_widgets/map_screen_app_bar.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -19,7 +23,7 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controllerCompleter = Completer<GoogleMapController>();
 
-  static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084); // Googleplex
+  static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084);
   LatLng _currentMapPosition = _defaultInitialPosition;
 
   bool _isLoadingLocation = true;
@@ -31,12 +35,10 @@ class _MapScreenState extends State<MapScreen> {
   List<FoodTruck> _allFoodTrucks = [];
   List<FoodTruck> _filteredFoodTrucks = [];
 
-  // --- Search State ---
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchQuery = "";
 
-  // --- Filter State ---
   String? _selectedFoodTypeFilter;
   List<String> _availableFoodTypes = [];
 
@@ -58,10 +60,8 @@ class _MapScreenState extends State<MapScreen> {
 
   void _onSearchChanged() {
     if (_searchQuery != _searchController.text) {
-      if (mounted) { // Check if widget is still in the tree
-        setState(() {
-          _searchQuery = _searchController.text;
-        });
+      if (mounted) {
+        setState(() { _searchQuery = _searchController.text; });
       }
       _filterFoodTrucks();
     }
@@ -71,96 +71,55 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     final Set<String> types = {};
     for (var truck in _allFoodTrucks) {
-      if (truck.type.isNotEmpty) {
-        // Normalize type names for consistency if needed (e.g., capitalize first letter)
-        // String normalizedType = truck.type[0].toUpperCase() + truck.type.substring(1).toLowerCase();
-        // types.add(normalizedType);
-        types.add(truck.type);
-      }
+      if (truck.type.isNotEmpty) { types.add(truck.type); }
     }
     if (mounted) {
       setState(() {
-        _availableFoodTypes = types.toList()..sort(
-          (a, b) => a.toLowerCase().compareTo(b.toLowerCase())
-        );
+        _availableFoodTypes = types.toList()..sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
       });
     }
   }
 
   void _filterFoodTrucks() {
-    List<FoodTruck> trucksToDisplay;
-
-    trucksToDisplay = List.from(_allFoodTrucks);
-
+    List<FoodTruck> trucksToDisplay = List.from(_allFoodTrucks);
     if (_selectedFoodTypeFilter != null && _selectedFoodTypeFilter!.isNotEmpty) {
-      trucksToDisplay = trucksToDisplay.where((truck) {
-        return truck.type.toLowerCase() == _selectedFoodTypeFilter!.toLowerCase();
-      }).toList();
+      trucksToDisplay = trucksToDisplay.where((truck) => truck.type.toLowerCase() == _selectedFoodTypeFilter!.toLowerCase()).toList();
     }
-
     if (_searchQuery.isNotEmpty) {
-      trucksToDisplay = trucksToDisplay.where((truck) {
-        return truck.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               truck.type.toLowerCase().contains(_searchQuery.toLowerCase());
-      }).toList();
+      trucksToDisplay = trucksToDisplay.where((truck) =>
+          truck.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          truck.type.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
     }
-    
     if (mounted) {
-      setState(() {
-        _filteredFoodTrucks = trucksToDisplay;
-      });
+      setState(() { _filteredFoodTrucks = trucksToDisplay; });
     }
     _createMarkersFromData(trucksToDisplay);
   }
 
   void _listenToFoodTruckUpdates() {
     print("[MapScreen] Subscribing to food truck updates...");
-    if (mounted) {
-      setState(() { _isLoadingFoodTrucks = true; });
-    }
-
+    if (mounted) setState(() { _isLoadingFoodTrucks = true; });
     _foodTrucksSubscription = FirebaseFirestore.instance
-        .collection('foodTrucks')
-        .where('isVerified', isEqualTo: true)
-        .snapshots()
+        .collection('foodTrucks').where('isVerified', isEqualTo: true).snapshots()
         .listen((QuerySnapshot snapshot) {
       print("[MapScreen] Received food truck data snapshot. Docs: ${snapshot.docs.length}");
       List<FoodTruck> fetchedTrucks = [];
       if (snapshot.docs.isNotEmpty) {
         try {
-          fetchedTrucks = snapshot.docs
-              .map((doc) => FoodTruck.fromFirestore(doc))
-              .toList();
-        } catch (e) {
-          print("[MapScreen] Error parsing food truck data: $e");
-          fetchedTrucks = []; 
-        }
-      } else {
-        print("[MapScreen] No food trucks found in snapshot.");
-      }
-      
+          fetchedTrucks = snapshot.docs.map((doc) => FoodTruck.fromFirestore(doc)).toList();
+        } catch (e) { print("[MapScreen] Error parsing food truck data: $e"); fetchedTrucks = []; }
+      } else { print("[MapScreen] No food trucks found in snapshot."); }
       if (mounted) {
-        setState(() {
-          _allFoodTrucks = fetchedTrucks;
-          _populateAvailableFoodTypes();
-        });
-        _filterFoodTrucks(); 
-        if (mounted) {
-          setState(() { _isLoadingFoodTrucks = false; });
-        }
+        setState(() { _allFoodTrucks = fetchedTrucks; _populateAvailableFoodTypes(); });
+        _filterFoodTrucks();
+        if (mounted) setState(() { _isLoadingFoodTrucks = false; });
       }
-
     }, onError: (error) {
       print("[MapScreen] Error listening to food truck updates: $error");
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text(
-                'Error loading food trucks: ${error.toString().substring(0, (error.toString().length > 100) ? 100 : error.toString().length)}...')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error loading food trucks: ${error.toString().substring(0, 100)}...')));
         setState(() {
-          _isLoadingFoodTrucks = false;
-          _allFoodTrucks = [];
-          _filteredFoodTrucks = [];
-          _availableFoodTypes = [];
+          _isLoadingFoodTrucks = false; _allFoodTrucks = []; _filteredFoodTrucks = []; _availableFoodTypes = [];
           _createMarkersFromData([]);
         });
       }
@@ -170,135 +129,51 @@ class _MapScreenState extends State<MapScreen> {
   void _createMarkersFromData(List<FoodTruck> trucks) {
     Set<Marker> tempMarkers = {};
     for (var truck in trucks) {
-      tempMarkers.add(
-        Marker(
-          markerId: MarkerId(truck.id),
-          position: truck.position,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-          infoWindow: InfoWindow(
-            title: truck.name,
-            snippet: 'Type: ${truck.type}. Tap for details.',
-          ),
-          onTap: () {
-            _showFoodTruckDetailsBottomSheet(truck);
-          },
-        ),
-      );
+      tempMarkers.add(Marker(
+        markerId: MarkerId(truck.id), position: truck.position,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+        infoWindow: InfoWindow(title: truck.name, snippet: 'Type: ${truck.type}. Tap for details.'),
+        onTap: () => _showFoodTruckDetailsBottomSheet(truck),
+      ));
     }
-
-    if (mounted) {
-      setState(() {
-        _markers.clear();
-        _markers.addAll(tempMarkers);
-      });
-    }
+    if (mounted) setState(() { _markers.clear(); _markers.addAll(tempMarkers); });
   }
 
+  // MODIFIED: Now calls the extracted widget
   void _showFoodTruckDetailsBottomSheet(FoodTruck truck) {
-    print("--- BottomSheet for Truck ID: ${truck.id} ---");
+    // Debug prints can remain here or move to the widget if preferred
+    print("--- BottomSheet for Truck ID: ${truck.id} (called from MapScreen) ---");
     print("Truck Name: ${truck.name}");
     print("Truck ReportedBy field (from truck object): '${truck.reportedBy}'");
-    print("Truck Last Reported Date: ${truck.lastReported}");
-    print("Truck Location Description: ${truck.locationDescription}");
-
-    String formattedDateTime =
-        "${truck.lastReported.toLocal().day.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().month.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().year} at ${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')}";
 
     showModalBottomSheet(
-      context: context,
+      context: context, // Use MapScreen's context for showing the sheet
       backgroundColor: Theme.of(context).cardColor,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.0),
-          topRight: Radius.circular(20.0),
-        ),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(20.0), topRight: Radius.circular(20.0)),
       ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            top: 20.0, left: 20.0, right: 20.0,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
-                truck.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-              ),
-              const SizedBox(height: 16),
-              _buildDetailRow(Icons.category_outlined, "Type", truck.type),
-              if (truck.locationDescription != null && truck.locationDescription!.isNotEmpty)
-                 _buildDetailRow(Icons.description_outlined, "Description", truck.locationDescription!),
-              _buildDetailRow(Icons.person_pin_circle_outlined, "Reported by", truck.reportedBy),
-              _buildDetailRow(Icons.timer_outlined, "Last Reported", formattedDateTime),
-              const SizedBox(height: 24),
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
-                  ),
-                  child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-            ],
-          ),
-        );
+      builder: (_) { // The builder context is specific to the bottom sheet
+        return FoodTruckDetailsBottomSheet(truck: truck, parentContext: context);
       },
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 22.0, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 16.0),
-          Text(
-            "$label: ",
-            style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // _buildDetailRow is now part of FoodTruckDetailsBottomSheet
+  // _launchDirections is now part of FoodTruckDetailsBottomSheet or passed as a callback
 
-  Future<void> _getUserLocationAndCenterMap() async {
+  Future<void> _getUserLocationAndCenterMap() async { /* ... remains the same ... */
     if (!mounted) return;
     setState(() { _isLoadingLocation = true; });
-
-    bool serviceEnabled;
-    LocationPermission permission;
-
+    bool serviceEnabled; LocationPermission permission;
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location services are disabled.')));
         setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
       }
-      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
-      return;
+      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition); return;
     }
-
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -307,27 +182,20 @@ class _MapScreenState extends State<MapScreen> {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location permissions are denied.')));
           setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
         }
-        if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
-        return;
+        if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition); return;
       }
     }
-
     if (permission == LocationPermission.deniedForever) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Location permissions are permanently denied.')));
         setState(() { _currentMapPosition = _defaultInitialPosition; _isLoadingLocation = false; });
       }
-      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
-      return;
+      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition); return;
     }
-
     try {
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       if (mounted) {
-        setState(() {
-          _currentMapPosition = LatLng(position.latitude, position.longitude);
-          _isLoadingLocation = false;
-        });
+        setState(() { _currentMapPosition = LatLng(position.latitude, position.longitude); _isLoadingLocation = false; });
       }
       _animateToPosition(_currentMapPosition);
     } catch (e) {
@@ -340,80 +208,47 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> _animateToPosition(LatLng position) async {
+  Future<void> _animateToPosition(LatLng position) async { /* ... remains the same ... */
     final GoogleMapController controller = await _controllerCompleter.future;
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(target: position, zoom: 15.0),
-    ));
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: position, zoom: 15.0)));
   }
 
-  void _showFilterDialog() {
+  void _showFilterDialog() { /* ... remains the same ... */
     showDialog(
       context: context,
       builder: (BuildContext context) {
         String? tempSelectedType = _selectedFoodTypeFilter;
-
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setDialogState) {
             return AlertDialog(
               title: const Text('Filter Food Trucks'),
               content: SingleChildScrollView(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     const Text('Filter by Food Type:', style: TextStyle(fontWeight: FontWeight.bold)),
                     const SizedBox(height: 12),
-                    if (_availableFoodTypes.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text("No types available to filter."),
-                      ),
+                    if (_availableFoodTypes.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text("No types available to filter.")),
                     if (_availableFoodTypes.isNotEmpty)
                       DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0) // Adjust padding
-                        ),
-                        hint: const Text("All Types"),
-                        value: tempSelectedType,
-                        isExpanded: true,
+                        decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0)),
+                        hint: const Text("All Types"), value: tempSelectedType, isExpanded: true,
                         items: [
-                          const DropdownMenuItem<String>(
-                            value: null,
-                            child: Text("All Types"),
-                          ),
-                          ..._availableFoodTypes.map((String type) {
-                            return DropdownMenuItem<String>(
-                              value: type,
-                              child: Text(type),
-                            );
-                          }).toList(),
+                          const DropdownMenuItem<String>(value: null, child: Text("All Types")),
+                          ..._availableFoodTypes.map((String type) => DropdownMenuItem<String>(value: type, child: Text(type))).toList(),
                         ],
-                        onChanged: (String? newValue) {
-                          setDialogState(() {
-                            tempSelectedType = newValue;
-                          });
-                        },
+                        onChanged: (String? newValue) => setDialogState(() => tempSelectedType = newValue),
                       ),
                   ],
                 ),
               ),
               actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancel'),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+                TextButton(child: const Text('Cancel'), onPressed: () => Navigator.of(context).pop()),
                 ElevatedButton(
                   child: const Text('Apply Filters'),
                   onPressed: () {
-                    if (mounted) {
-                      setState(() {
-                        _selectedFoodTypeFilter = tempSelectedType;
-                      });
-                    }
-                    _filterFoodTrucks();
-                    Navigator.of(context).pop();
+                    if (mounted) setState(() => _selectedFoodTypeFilter = tempSelectedType);
+                    _filterFoodTrucks(); Navigator.of(context).pop();
                   },
                 ),
               ],
@@ -424,99 +259,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  AppBar _buildAppBar() {
-    if (_isSearching) {
-      return AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            if (mounted) {
-              setState(() {
-                _isSearching = false;
-                _searchController.clear(); // This also triggers _onSearchChanged -> _filterFoodTrucks
-              });
-            }
-          },
-        ),
-        title: TextField(
-          controller: _searchController,
-          autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Search by name or type...',
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.white70),
-          ),
-          style: const TextStyle(color: Colors.white, fontSize: 18.0),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: () {
-              if (_searchController.text.isEmpty) {
-                if (mounted) { setState(() { _isSearching = false; });}
-              } else {
-                _searchController.clear();
-              }
-            },
-          ),
-        ],
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      );
-    } else {
-      return AppBar(
-        title: Row( // Using Row to allow Chip next to title
-          children: [
-            Expanded(child: Text(widget.title)), // Title takes available space
-            if (_selectedFoodTypeFilter != null && _selectedFoodTypeFilter!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0),
-                child: Chip(
-                  label: Text(_selectedFoodTypeFilter!, style: const TextStyle(fontSize: 12)),
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7),
-                  deleteIcon: const Icon(Icons.close, size: 14),
-                  onDeleted: (){
-                    if(mounted){
-                      setState(() {
-                        _selectedFoodTypeFilter = null;
-                      });
-                      _filterFoodTrucks();
-                    }
-                  },
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0), // Reduced vertical padding
-                  labelPadding: const EdgeInsets.only(left: 6), // Adjust label padding
-                  deleteIconColor: Theme.of(context).colorScheme.onPrimaryContainer,
-                ),
-              )
-          ],
-        ),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.filter_list, color: _selectedFoodTypeFilter != null ? Theme.of(context).colorScheme.primary : null),
-            tooltip: 'Filter',
-            onPressed: _showFilterDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            tooltip: 'Search',
-            onPressed: () {
-              if (mounted) { setState(() { _isSearching = true; });}
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ProfileScreen()),
-              );
-            },
-          ),
-        ],
-      );
-    }
-  }
+  // _buildAppBar is now removed, using MapScreenAppBar widget
 
   @override
   Widget build(BuildContext context) {
@@ -524,68 +267,59 @@ class _MapScreenState extends State<MapScreen> {
     bool noResultsAfterFilterOrSearch = !_isLoadingFoodTrucks && _filteredFoodTrucks.isEmpty && (_searchQuery.isNotEmpty || _selectedFoodTypeFilter != null);
 
     return Scaffold(
-      appBar: _buildAppBar(),
+      // MODIFIED: Use the extracted AppBar widget
+      appBar: MapScreenAppBar(
+        title: widget.title,
+        isSearching: _isSearching,
+        searchController: _searchController,
+        activeFilterDisplay: _selectedFoodTypeFilter,
+        onSearchPressed: () {
+          if (mounted) setState(() => _isSearching = true);
+        },
+        onFilterPressed: _showFilterDialog,
+        onProfilePressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileScreen()));
+        },
+        onExitSearch: () {
+          if (mounted) {
+            setState(() { _isSearching = false; _searchController.clear(); /* This triggers _onSearchChanged -> _filterFoodTrucks */ });
+          }
+        },
+        onClearActiveFilter: (){
+          if(mounted){
+            setState(() => _selectedFoodTypeFilter = null);
+            _filterFoodTrucks();
+          }
+        },
+      ),
       body: Stack(
         children: [
           GoogleMap(
             onMapCreated: (GoogleMapController controller) {
-              if (!_controllerCompleter.isCompleted) {
-                _controllerCompleter.complete(controller);
-              }
-              if (!_isLoadingLocation && _currentMapPosition != _defaultInitialPosition) {
-                 _animateToPosition(_currentMapPosition);
-              }
+              if (!_controllerCompleter.isCompleted) _controllerCompleter.complete(controller);
+              if (!_isLoadingLocation && _currentMapPosition != _defaultInitialPosition) _animateToPosition(_currentMapPosition);
             },
-            initialCameraPosition: CameraPosition(
-              target: _currentMapPosition,
-              zoom: 11.0,
-            ),
-            markers: _markers,
-            myLocationEnabled: true,
-            myLocationButtonEnabled: false,
-            zoomControlsEnabled: true,
+            initialCameraPosition: CameraPosition(target: _currentMapPosition, zoom: 11.0),
+            markers: _markers, myLocationEnabled: true, myLocationButtonEnabled: false, zoomControlsEnabled: true,
           ),
-          if (showPrimaryLoader)
-            const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-              ),
-            ),
+          if (showPrimaryLoader) const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.orange))),
           if (noResultsAfterFilterOrSearch)
             Center(
               child: Container(
-                margin: const EdgeInsets.all(20),
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.75),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
+                margin: const EdgeInsets.all(20), padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+                decoration: BoxDecoration(color: Colors.black.withOpacity(0.75), borderRadius: BorderRadius.circular(8.0)),
                 child: Text(
-                  _searchQuery.isNotEmpty 
-                    ? 'No food trucks found for "$_searchQuery"${_selectedFoodTypeFilter != null ? " of type \"$_selectedFoodTypeFilter\"" : ""}' 
-                    : 'No food trucks found for type "$_selectedFoodTypeFilter"',
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
-                  textAlign: TextAlign.center,
+                  _searchQuery.isNotEmpty ? 'No food trucks found for "$_searchQuery"${_selectedFoodTypeFilter != null ? " of type \"$_selectedFoodTypeFilter\"" : ""}' : 'No food trucks found for type "$_selectedFoodTypeFilter"',
+                  style: const TextStyle(color: Colors.white, fontSize: 16), textAlign: TextAlign.center,
                 ),
               ),
             ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getUserLocationAndCenterMap,
-        tooltip: 'My Location',
-        backgroundColor: Theme.of(context).colorScheme.secondary,
-        foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        child: _isLoadingLocation
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 3,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : const Icon(Icons.my_location),
+        onPressed: _getUserLocationAndCenterMap, tooltip: 'My Location',
+        backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary,
+        child: _isLoadingLocation ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))) : const Icon(Icons.my_location),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
