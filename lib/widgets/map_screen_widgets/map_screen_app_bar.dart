@@ -6,11 +6,12 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onSearchPressed;
   final VoidCallback onProfilePressed;
   final VoidCallback onFilterPressed;
+  final VoidCallback onMapStylePressed;
+  final VoidCallback onReportTruckPressed; // New callback for reporting
   final VoidCallback onExitSearch;
   final TextEditingController searchController;
-  final String? activeFilterDisplay; // e.g., "Type: Dessert"
+  final String? activeFilterDisplay;
   final VoidCallback? onClearActiveFilter;
-
 
   const MapScreenAppBar({
     super.key,
@@ -19,6 +20,8 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onSearchPressed,
     required this.onProfilePressed,
     required this.onFilterPressed,
+    required this.onMapStylePressed,
+    required this.onReportTruckPressed, // Added to constructor
     required this.onExitSearch,
     required this.searchController,
     this.activeFilterDisplay,
@@ -48,9 +51,9 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.clear),
             onPressed: () {
               if (searchController.text.isEmpty) {
-                onExitSearch(); // Exit search mode if field is empty and clear is pressed
+                onExitSearch();
               } else {
-                searchController.clear(); // This will trigger listener in MapScreen
+                searchController.clear();
               }
             },
           ),
@@ -80,6 +83,16 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
+          IconButton( // Report Truck Button
+            icon: const Icon(Icons.add_location_alt_outlined),
+            tooltip: 'Report Food Truck',
+            onPressed: onReportTruckPressed, // Use the new callback
+          ),
+          IconButton( 
+            icon: const Icon(Icons.layers_outlined),
+            tooltip: 'Map Style',
+            onPressed: onMapStylePressed,
+          ),
           IconButton(
             icon: Icon(Icons.filter_list, color: activeFilterDisplay != null ? Theme.of(context).colorScheme.primary : null),
             tooltip: 'Filter',
