@@ -4,12 +4,32 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart'; // Import geolocator
-import 'firebase_options.dart';
+import 'firebase_options.dart'; // Import generated options
+
+// --- Simple Food Truck Model for Mock Data ---
+class FoodTruck {
+  final String id;
+  final String name;
+  final String type; // e.g., "Mee Goreng", "Coffee", "BBQ"
+  final LatLng position;
+  final String reportedBy;
+  final DateTime lastReported;
+
+  FoodTruck({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.position,
+    required this.reportedBy,
+    required this.lastReported,
+  });
+}
+// --- End of Food Truck Model ---
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase.initializeApp
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform, // Use generated options
   );
   runApp(const MyApp());
 }
@@ -23,6 +43,7 @@ class MyApp extends StatelessWidget {
       title: 'FoodTruck Finder',
       theme: ThemeData(
         primarySwatch: Colors.orange,
+        useMaterial3: true, // Optional: for modern Material Design components
       ),
       home: const MyHomePage(title: 'FoodTruck Finder - Map'),
     );
@@ -38,41 +59,112 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // Use Completer for the GoogleMapController as it's not available immediately
   final Completer<GoogleMapController> _controllerCompleter = Completer<GoogleMapController>();
-  GoogleMapController? _mapController; // To store the controller once available
+  GoogleMapController? _mapController;
 
-  static const LatLng _defaultInitialPosition = LatLng(37.422, -122.084); // Googleplex as a fallback
+  static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084); // Googleplex as a fallback
   LatLng _currentMapPosition = _defaultInitialPosition;
   bool _isLoadingLocation = true;
+
+  // Set to store the map markers
+  final Set<Marker> _markers = {};
+  // List of mock food trucks
+  late List<FoodTruck> _mockFoodTrucks;
 
   @override
   void initState() {
     super.initState();
-    _getUserLocationAndCenterMap();
+    _initializeMockFoodTrucks(); // Initialize mock data and create markers
+    _getUserLocationAndCenterMap(); // Get user location
+  }
+
+  void _initializeMockFoodTrucks() {
+    _mockFoodTrucks = [
+      FoodTruck(
+        id: "ft1",
+        name: "Speedy Tacos",
+        type: "Tacos",
+        position: const LatLng(37.785834, -122.406417), // Near Moscone Center, SF
+        reportedBy: "UserA",
+        lastReported: DateTime.now().subtract(const Duration(hours: 1)),
+      ),
+      FoodTruck(
+        id: "ft2",
+        name: "Java Express",
+        type: "Coffee",
+        position: const LatLng(37.774929, -122.419416), // Near Civic Center, SF
+        reportedBy: "UserB",
+        lastReported: DateTime.now().subtract(const Duration(minutes: 30)),
+      ),
+      FoodTruck(
+        id: "ft3",
+        name: "BBQ Bonanza",
+        type: "BBQ",
+        position: const LatLng(37.795213, -122.394073), // Near Ferry Building, SF
+        reportedBy: "UserC",
+        lastReported: DateTime.now().subtract(const Duration(hours: 2, minutes: 15)),
+      ),
+      FoodTruck(
+        id: "ft4",
+        name: "Curry Up Now",
+        type: "Indian",
+        position: const LatLng(37.4239999, -122.0860575), // Near Googleplex
+        reportedBy: "UserD",
+        lastReported: DateTime.now().subtract(const Duration(days:1)),
+      ),
+    ];
+
+    _createMarkersFromMockData();
+  }
+
+  void _createMarkersFromMockData() {
+    Set<Marker> tempMarkers = {};
+    for (var truck in _mockFoodTrucks) {
+      // Format DateTime for snippet
+      String formattedTime = "${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')} ${truck.lastReported.toLocal().day}/${truck.lastReported.toLocal().month}";
+
+      tempMarkers.add(
+        Marker(
+          markerId: MarkerId(truck.id),
+          position: truck.position,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          infoWindow: InfoWindow(
+            title: truck.name,
+            snippet: 'Type: ${truck.type} | By: ${truck.reportedBy} @ $formattedTime',
+          ),
+        ),
+      );
+    }
+    // Check if the widget is still mounted before calling setState
+    if (mounted) {
+      setState(() {
+        _markers.addAll(tempMarkers);
+      });
+    }
   }
 
   Future<void> _getUserLocationAndCenterMap() async {
-    setState(() {
-      _isLoadingLocation = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoadingLocation = true;
+      });
+    }
+
 
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Test if location services are enabled.
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      // Location services are not enabled don't continue
-      // accessing the position and request users of the
-      // App to enable the location services.
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location services are disabled. Please enable them to see your location.')));
-      setState(() {
-        _currentMapPosition = _defaultInitialPosition;
-        _isLoadingLocation = false;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Location services are disabled. Please enable them.')));
+        setState(() {
+          _currentMapPosition = _defaultInitialPosition;
+          _isLoadingLocation = false;
+        });
+      }
       _animateToPosition(_currentMapPosition);
       return;
     }
@@ -81,63 +173,64 @@ class _MyHomePageState extends State<MyHomePage> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // Permissions are denied, next time you could try
-        // requesting permissions again (this is also where
-        // Android's shouldShowRequestPermissionRationale
-        // returned true. According to Android guidelines
-        // your App should show an explanatory UI now.
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Location permissions are denied.')));
-        setState(() {
-          _currentMapPosition = _defaultInitialPosition;
-          _isLoadingLocation = false;
-        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Location permissions are denied.')));
+          setState(() {
+            _currentMapPosition = _defaultInitialPosition;
+            _isLoadingLocation = false;
+          });
+        }
         _animateToPosition(_currentMapPosition);
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are denied forever, handle appropriately.
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'Location permissions are permanently denied, we cannot request permissions.')));
-      setState(() {
-        _currentMapPosition = _defaultInitialPosition;
-        _isLoadingLocation = false;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'Location permissions are permanently denied.')));
+        setState(() {
+          _currentMapPosition = _defaultInitialPosition;
+          _isLoadingLocation = false;
+        });
+      }
       _animateToPosition(_currentMapPosition);
       return;
     }
 
-    // When we reach here, permissions are granted and we can
-    // continue accessing the position of the device.
     try {
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-      setState(() {
-        _currentMapPosition = LatLng(position.latitude, position.longitude);
-        _isLoadingLocation = false;
-      });
+      if (mounted) {
+        setState(() {
+          _currentMapPosition = LatLng(position.latitude, position.longitude);
+          _isLoadingLocation = false;
+        });
+      }
       _animateToPosition(_currentMapPosition);
     } catch (e) {
       print("Error getting location: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting location: $e')));
-      setState(() {
-        _currentMapPosition = _defaultInitialPosition; // Fallback
-        _isLoadingLocation = false;
-      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error getting location: $e')));
+        setState(() {
+          _currentMapPosition = _defaultInitialPosition;
+          _isLoadingLocation = false;
+        });
+      }
       _animateToPosition(_currentMapPosition);
     }
   }
 
   Future<void> _animateToPosition(LatLng position) async {
+    // Ensure _mapController is initialized (it might not be if map creation is slow or fails)
     final GoogleMapController controller = await _controllerCompleter.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
         target: position,
-        zoom: 15.0, // Zoom in a bit more when centered on user
+        zoom: 15.0,
       ),
     ));
   }
@@ -147,25 +240,25 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.orange,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer, // Using theme color
       ),
       body: Stack(
         children: [
           GoogleMap(
             onMapCreated: (GoogleMapController controller) {
               if (!_controllerCompleter.isCompleted) {
-                _controllerCompleter.complete(controller); // Complete the completer
-                 _mapController = controller; // Store controller
+                _controllerCompleter.complete(controller);
+                 _mapController = controller; // Also assign to _mapController for direct access if needed
               }
             },
             initialCameraPosition: CameraPosition(
               target: _currentMapPosition, // Use the potentially updated position
-              zoom: 11.0,
+              zoom: 11.0, // Initial zoom before centering on user
             ),
-            markers: const {}, // Empty set of markers for now
-            myLocationEnabled: true, // Shows the blue dot for user's location
-            myLocationButtonEnabled: false, // We'll use our own button or auto-center
-            zoomControlsEnabled: true, // Show default zoom controls
+            markers: _markers, // Display the mock markers
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false, // Using custom FAB
+            zoomControlsEnabled: true,
           ),
           if (_isLoadingLocation)
             const Center(
@@ -176,11 +269,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _getUserLocationAndCenterMap, // Re-fetch and center
+        onPressed: _getUserLocationAndCenterMap,
         tooltip: 'My Location',
         backgroundColor: Colors.orange,
-        child: _isLoadingLocation
-            ? const SizedBox( // Show smaller progress indicator on FAB if loading
+        child: _isLoadingLocation && !_controllerCompleter.isCompleted // Show progress only if map is also not ready
+            ? const SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
