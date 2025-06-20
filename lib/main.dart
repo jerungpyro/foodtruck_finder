@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // Import generated options
+import 'firebase_options.dart';
 
-// Import the new map screen
-import 'screens/map_screen.dart';
+// Import the AuthWrapper
+import 'widgets/auth_wrapper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,12 +21,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FoodTruck Finder',
       theme: ThemeData(
-        primarySwatch: Colors.orange, // You can keep this
+        primarySwatch: Colors.orange,
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange), // Or use ColorScheme
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
       ),
-      // Use MapScreen as the home screen
-      home: const MapScreen(title: 'FoodTruck Finder - Map'),
+      // Use AuthWrapper as the home
+      home: const AuthWrapper(),
     );
   }
 }

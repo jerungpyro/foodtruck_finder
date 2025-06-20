@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // This line needs 'flutter pub get' to work
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Import the FoodTruck model
 import '../models/food_truck_model.dart';
+// Import the ProfileScreen for navigation
+import 'profile_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -18,7 +20,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final Completer<GoogleMapController> _controllerCompleter = Completer<GoogleMapController>();
-  // GoogleMapController? _mapController; // REMOVED - Was unused
+  // GoogleMapController? _mapController; // Was removed as unused
 
   static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084); // Googleplex
   LatLng _currentMapPosition = _defaultInitialPosition;
@@ -42,9 +44,8 @@ class _MapScreenState extends State<MapScreen> {
     });
 
     try {
-      // QuerySnapshot will be defined once package is resolved
       QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('foodTrucks').get(); // FirebaseFirestore will be defined
+          await FirebaseFirestore.instance.collection('foodTrucks').get();
 
       List<FoodTruck> fetchedTrucks = [];
       if (snapshot.docs.isNotEmpty) {
@@ -52,7 +53,7 @@ class _MapScreenState extends State<MapScreen> {
             .map((doc) => FoodTruck.fromFirestore(doc))
             .toList();
       } else {
-        print("No food trucks found in Firestore."); // Lint warning: avoid print
+        print("No food trucks found in Firestore.");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('No food trucks found nearby right now.')));
@@ -61,13 +62,13 @@ class _MapScreenState extends State<MapScreen> {
       _createMarkersFromData(fetchedTrucks);
 
     } catch (e) {
-      print("Error fetching food trucks: $e"); // Lint warning: avoid print
+      print("Error fetching food trucks: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(
                 'Error loading food trucks: ${e.toString().substring(0, (e.toString().length > 100) ? 100 : e.toString().length)}...')));
       }
-      _createMarkersFromData([]);
+      _createMarkersFromData([]); // Clear markers or show error state
     } finally {
       if (mounted) {
         setState(() {
@@ -244,7 +245,7 @@ class _MapScreenState extends State<MapScreen> {
 
     try {
       Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high); // Lint warning: desiredAccuracy deprecated
+          desiredAccuracy: LocationAccuracy.high);
       if (mounted) {
         setState(() {
           _currentMapPosition = LatLng(position.latitude, position.longitude);
@@ -253,7 +254,7 @@ class _MapScreenState extends State<MapScreen> {
       }
       _animateToPosition(_currentMapPosition);
     } catch (e) {
-      print("Error getting location: $e"); // Lint warning: avoid print
+      print("Error getting location: $e");
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Error getting location: $e')));
@@ -281,6 +282,18 @@ class _MapScreenState extends State<MapScreen> {
       appBar: AppBar(
         title: Text(widget.title),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        actions: [ // Added actions for Profile button
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Profile',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
@@ -288,8 +301,9 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: (GoogleMapController controller) {
               if (!_controllerCompleter.isCompleted) {
                 _controllerCompleter.complete(controller);
-                // _mapController = controller; // Assignment removed
+                // _mapController = controller; // Assignment was removed
               }
+              // If location was determined before map was ready, move camera now
               if (!_isLoadingLocation && _currentMapPosition != _defaultInitialPosition) {
                  _animateToPosition(_currentMapPosition);
               }
@@ -314,7 +328,7 @@ class _MapScreenState extends State<MapScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _getUserLocationAndCenterMap();
-          _fetchFoodTrucksAndCreateMarkers();
+          _fetchFoodTrucksAndCreateMarkers(); // Re-fetches food trucks
         },
         tooltip: 'Refresh Location & Trucks',
         backgroundColor: Theme.of(context).colorScheme.secondary,
