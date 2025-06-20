@@ -27,9 +27,9 @@ class FoodTruck {
 // --- End of Food Truck Model ---
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Required for Firebase.initializeApp
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Use generated options
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const MyApp());
 }
@@ -43,7 +43,8 @@ class MyApp extends StatelessWidget {
       title: 'FoodTruck Finder',
       theme: ThemeData(
         primarySwatch: Colors.orange,
-        useMaterial3: true, // Optional: for modern Material Design components
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange), // Better theming
       ),
       home: const MyHomePage(title: 'FoodTruck Finder - Map'),
     );
@@ -62,20 +63,18 @@ class _MyHomePageState extends State<MyHomePage> {
   final Completer<GoogleMapController> _controllerCompleter = Completer<GoogleMapController>();
   GoogleMapController? _mapController;
 
-  static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084); // Googleplex as a fallback
+  static const LatLng _defaultInitialPosition = LatLng(37.4219983, -122.084);
   LatLng _currentMapPosition = _defaultInitialPosition;
   bool _isLoadingLocation = true;
 
-  // Set to store the map markers
   final Set<Marker> _markers = {};
-  // List of mock food trucks
   late List<FoodTruck> _mockFoodTrucks;
 
   @override
   void initState() {
     super.initState();
-    _initializeMockFoodTrucks(); // Initialize mock data and create markers
-    _getUserLocationAndCenterMap(); // Get user location
+    _initializeMockFoodTrucks();
+    _getUserLocationAndCenterMap();
   }
 
   void _initializeMockFoodTrucks() {
@@ -84,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
         id: "ft1",
         name: "Speedy Tacos",
         type: "Tacos",
-        position: const LatLng(37.785834, -122.406417), // Near Moscone Center, SF
+        position: const LatLng(37.785834, -122.406417),
         reportedBy: "UserA",
         lastReported: DateTime.now().subtract(const Duration(hours: 1)),
       ),
@@ -92,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
         id: "ft2",
         name: "Java Express",
         type: "Coffee",
-        position: const LatLng(37.774929, -122.419416), // Near Civic Center, SF
+        position: const LatLng(37.774929, -122.419416),
         reportedBy: "UserB",
         lastReported: DateTime.now().subtract(const Duration(minutes: 30)),
       ),
@@ -100,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
         id: "ft3",
         name: "BBQ Bonanza",
         type: "BBQ",
-        position: const LatLng(37.795213, -122.394073), // Near Ferry Building, SF
+        position: const LatLng(37.795213, -122.394073),
         reportedBy: "UserC",
         lastReported: DateTime.now().subtract(const Duration(hours: 2, minutes: 15)),
       ),
@@ -108,21 +107,17 @@ class _MyHomePageState extends State<MyHomePage> {
         id: "ft4",
         name: "Curry Up Now",
         type: "Indian",
-        position: const LatLng(37.4239999, -122.0860575), // Near Googleplex
+        position: const LatLng(37.4239999, -122.0860575),
         reportedBy: "UserD",
-        lastReported: DateTime.now().subtract(const Duration(days:1)),
+        lastReported: DateTime.now().subtract(const Duration(days: 1)),
       ),
     ];
-
     _createMarkersFromMockData();
   }
 
   void _createMarkersFromMockData() {
     Set<Marker> tempMarkers = {};
     for (var truck in _mockFoodTrucks) {
-      // Format DateTime for snippet
-      String formattedTime = "${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')} ${truck.lastReported.toLocal().day}/${truck.lastReported.toLocal().month}";
-
       tempMarkers.add(
         Marker(
           markerId: MarkerId(truck.id),
@@ -130,17 +125,105 @@ class _MyHomePageState extends State<MyHomePage> {
           icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
           infoWindow: InfoWindow(
             title: truck.name,
-            snippet: 'Type: ${truck.type} | By: ${truck.reportedBy} @ $formattedTime',
+            snippet: 'Type: ${truck.type}',
           ),
+          onTap: () {
+            _showFoodTruckDetailsBottomSheet(truck);
+          },
         ),
       );
     }
-    // Check if the widget is still mounted before calling setState
     if (mounted) {
       setState(() {
+        _markers.clear();
         _markers.addAll(tempMarkers);
       });
     }
+  }
+
+  void _showFoodTruckDetailsBottomSheet(FoodTruck truck) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white, // Or Theme.of(context).cardColor
+      isScrollControlled: true, // Allows sheet to take more height if needed
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+        ),
+      ),
+      builder: (context) {
+        String formattedDateTime =
+            "${truck.lastReported.toLocal().day.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().month.toString().padLeft(2, '0')}/${truck.lastReported.toLocal().year} at ${truck.lastReported.toLocal().hour.toString().padLeft(2, '0')}:${truck.lastReported.toLocal().minute.toString().padLeft(2, '0')}";
+
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 20.0,
+            left: 20.0,
+            right: 20.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 20.0, // Adjust for keyboard
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                truck.name,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              _buildDetailRow(Icons.category_outlined, "Type", truck.type),
+              _buildDetailRow(Icons.person_pin_circle_outlined, "Reported by", truck.reportedBy),
+              _buildDetailRow(Icons.timer_outlined, "Last Reported", formattedDateTime),
+              const SizedBox(height: 24),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)
+                  ),
+                  child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 22.0, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(width: 16.0),
+          Text(
+            "$label: ",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+              // softWrap: true, // Already default
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _getUserLocationAndCenterMap() async {
@@ -149,7 +232,6 @@ class _MyHomePageState extends State<MyHomePage> {
         _isLoadingLocation = true;
       });
     }
-
 
     bool serviceEnabled;
     LocationPermission permission;
@@ -165,7 +247,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _isLoadingLocation = false;
         });
       }
-      _animateToPosition(_currentMapPosition);
+      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
       return;
     }
 
@@ -181,7 +263,7 @@ class _MyHomePageState extends State<MyHomePage> {
             _isLoadingLocation = false;
           });
         }
-        _animateToPosition(_currentMapPosition);
+        if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
         return;
       }
     }
@@ -196,7 +278,7 @@ class _MyHomePageState extends State<MyHomePage> {
           _isLoadingLocation = false;
         });
       }
-      _animateToPosition(_currentMapPosition);
+      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
       return;
     }
 
@@ -220,12 +302,11 @@ class _MyHomePageState extends State<MyHomePage> {
           _isLoadingLocation = false;
         });
       }
-      _animateToPosition(_currentMapPosition);
+      if (_controllerCompleter.isCompleted) _animateToPosition(_currentMapPosition);
     }
   }
 
   Future<void> _animateToPosition(LatLng position) async {
-    // Ensure _mapController is initialized (it might not be if map creation is slow or fails)
     final GoogleMapController controller = await _controllerCompleter.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
@@ -240,7 +321,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer, // Using theme color
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Stack(
         children: [
@@ -248,31 +329,34 @@ class _MyHomePageState extends State<MyHomePage> {
             onMapCreated: (GoogleMapController controller) {
               if (!_controllerCompleter.isCompleted) {
                 _controllerCompleter.complete(controller);
-                 _mapController = controller; // Also assign to _mapController for direct access if needed
+                _mapController = controller;
+              }
+              // If location was determined before map was ready, move camera now
+              if (!_isLoadingLocation) {
+                 _animateToPosition(_currentMapPosition);
               }
             },
             initialCameraPosition: CameraPosition(
-              target: _currentMapPosition, // Use the potentially updated position
-              zoom: 11.0, // Initial zoom before centering on user
+              target: _currentMapPosition,
+              zoom: 11.0,
             ),
-            markers: _markers, // Display the mock markers
+            markers: _markers,
             myLocationEnabled: true,
-            myLocationButtonEnabled: false, // Using custom FAB
+            myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
           ),
           if (_isLoadingLocation)
             const Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
-              ),
+              child: CircularProgressIndicator(),
             ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _getUserLocationAndCenterMap,
         tooltip: 'My Location',
-        backgroundColor: Colors.orange,
-        child: _isLoadingLocation && !_controllerCompleter.isCompleted // Show progress only if map is also not ready
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSecondary,
+        child: _isLoadingLocation && !_controllerCompleter.isCompleted
             ? const SizedBox(
                 width: 24,
                 height: 24,
@@ -281,7 +365,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Icon(Icons.my_location, color: Colors.white),
+            : const Icon(Icons.my_location),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
