@@ -148,7 +148,7 @@ flutter run -d chrome
 10.  **Future Enhancements / TODO**
 Admin Panel:
 
-More sophisticated report approval (linking to existing trucks for updates) for managing food truck menus and promotional news.
+   *   More sophisticated report approval (linking to existing trucks for updates) for managing food truck menus and promotional news.
 
     *   Advanced user management (suspend, detailed view).
 
