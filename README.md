@@ -142,7 +142,7 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
 
 ### Admin Panel:
 
-*   ** Advanced report approval (linking updates to existing trucks).
+  *   Advanced report approval (linking updates to existing trucks).
 
 *   ** Manage food truck menus & promotions.
 
