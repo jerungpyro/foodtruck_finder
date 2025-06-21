@@ -184,11 +184,11 @@ Backend:
    *   (Add guidelines here if this is an open-source project or if you expect contributions.)
 
 11.  **Fork the Project**
+    
+   *   Create your Feature Branch (git checkout -b feature/AmazingFeature)
 
-    *   Create your Feature Branch (git checkout -b feature/AmazingFeature)
+   *   Commit your Changes (git commit -m 'Add some AmazingFeature')
 
-    *   Commit your Changes (git commit -m 'Add some AmazingFeature')
+   *   Push to the Branch (git push origin feature/AmazingFeature)
 
-    *   Push to the Branch (git push origin feature/AmazingFeature)
-
-    *   Open a Pull Request
+   *   Open a Pull Request
