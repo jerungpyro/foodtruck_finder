@@ -177,8 +177,6 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
 
 ## 🤝 Contributing
 
-(This is a placeholder. Update if you have specific contribution guidelines.)
-
    *   Fork the Project.
 
    *   Create your Feature Branch (git checkout -b feature/AmazingFeature).
