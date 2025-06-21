@@ -125,7 +125,9 @@ flutter run -d chrome
 
 (Log in with an admin user.)
 
+
 ### ✅ Key Development Phases Completed
+
 
 Phase 1-8: Core mobile app setup, map, auth, basic display, real-time updates, auxiliary pages.
 
@@ -135,7 +137,9 @@ Phase 10: Mobile App User Features (Search, Type Filtering, Directions).
 
 Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/existing trucks).
 
-### 💡 Future Enhancements / TODO
+
+## 💡 Future Enhancements / TODO
+
 **Admin Panel:**
 
    *   Advanced report approval (linking updates to existing trucks).
@@ -170,7 +174,8 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
 
    *   Server-side search indexing (e.g., Algolia) for larger datasets.
 
-### 🤝 Contributing
+
+## 🤝 Contributing
 
 (This is a placeholder. Update if you have specific contribution guidelines.)
 
@@ -185,7 +190,7 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
    *   Open a Pull Request.
 
 
-### 📞 Contact
+## 📞 Contact
 
 [Your Name / Your Team Name] - [your.email@example.com]
 Project Link: https://github.com/[your_username]/[your_project_repo] (Replace this!)
