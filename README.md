@@ -150,37 +150,37 @@ Admin Panel:
 
    *   More sophisticated report approval (linking to existing trucks for updates) for managing food truck menus and promotional news.
 
-    *   Advanced user management (suspend, detailed view).
+   *   Advanced user management (suspend, detailed view).
 
-    *   Dashboard analytics.
+   *   Dashboard analytics.
 
-    *   Mobile App:
+   *   Mobile App:
 
-    *   Display menus and promotional news.
+   *   Display menus and promotional news.
 
-    *   User ratings and reviews for food trucks.
+   *   User ratings and reviews for food trucks.
 
-    *   "Open Now" / Operating hours for food trucks and filtering.
+   *   "Open Now" / Operating hours for food trucks and filtering.
+     
+   *   User favorites system.
 
-    *   User favorites system.
+   *   Notifications (FCM).
 
-    *   Notifications (FCM).
+   *   Advanced search (by menu items, distance).
 
-    *   Advanced search (by menu items, distance).
+   *   Custom map markers based on food type.
 
-    *   Custom map markers based on food type.
+   *   UI/UX polish and dark mode.
+     
+Backend:
 
-    *   UI/UX polish and dark mode.
+   *   Cloud Function for automatic Firestore data cleanup on Firebase Auth user deletion.
 
-    *   Backend:
+   *   (Optional) Server-side search indexing (e.g., Algolia) for large datasets.
 
-    *   Cloud Function for automatic Firestore data cleanup on Firebase Auth user deletion.
-
-    *   (Optional) Server-side search indexing (e.g., Algolia) for large datasets.
-
-    *   Contributing
-
-    *   (Add guidelines here if this is an open-source project or if you expect contributions.)
+   *   Contributing
+     
+   *   (Add guidelines here if this is an open-source project or if you expect contributions.)
 
 11.  **Fork the Project**
 
