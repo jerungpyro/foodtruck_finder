@@ -192,5 +192,7 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
 
 ## 📞 Contact
 
-[Your Name / Your Team Name] - [your.email@example.com]
-Project Link: https://github.com/[your_username]/[your_project_repo] (Replace this!)
+-   [Badrul](https://github.com/jerungpyro)
+-   [Muhammad Sufyan](https://github.com/pyunk)
+-   [Azwar Ansori](https://github.com/AzwarAns61)
+-   [Wan Muhammad Azlan](https://github.com/Lannnzzz)
