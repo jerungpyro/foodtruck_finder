@@ -140,39 +140,39 @@ Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/exi
 
 ## 💡 Future Enhancements / TODO
 
-###Admin Panel:
+### Admin Panel:
 
-*   **Advanced report approval (linking updates to existing trucks).
+*   ** Advanced report approval (linking updates to existing trucks).
 
-*   **Manage food truck menus & promotions.
+*   ** Manage food truck menus & promotions.
 
-*   **Detailed user views & advanced actions (suspend, etc.).
+*   ** Detailed user views & advanced actions (suspend, etc.).
 
-*   **Dashboard analytics.
+*   ** Dashboard analytics.
 
-###Mobile App:
+### Mobile App:
 
-*   **Display menus and promotional news.
+*   ** Display menus and promotional news.
 
-*   **User ratings and reviews for food trucks.
+*   ** User ratings and reviews for food trucks.
 
-*   **Filter by "Open Now" / Operating hours.
+*   ** Filter by "Open Now" / Operating hours.
 
-*   **User favorites system.
+*   ** User favorites system.
 
-*   **Notifications (FCM).
+*   ** Notifications (FCM).
 
-*   **Advanced search (menu items, distance).
+*   ** Advanced search (menu items, distance).
 
-*   **Custom map markers per food type.
+*   ** Custom map markers per food type.
 
-*   **UI/UX polish, dark mode.
+*   ** UI/UX polish, dark mode.
 
-###Backend:
+### Backend:
 
-   *   Cloud Function for auto-deleting user data from Firestore on Auth account deletion.
+*   ** Cloud Function for auto-deleting user data from Firestore on Auth account deletion.
 
-   *   Server-side search indexing (e.g., Algolia) for larger datasets.
+*   ** Server-side search indexing (e.g., Algolia) for larger datasets.
 
 
 ## 🤝 Contributing
