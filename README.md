@@ -122,109 +122,74 @@ FoodTruck Finder is a mobile application designed to help users discover and rep
     *   Update your `firestore.rules` file in the Firebase console with appropriate security rules. Example rules are provided throughout the development phases, especially for `foodTrucks`, `users`, and `reports` collections, distinguishing between admin and regular user permissions.
     *   **Crucial for Admin Panel:** Ensure an admin user has a document in the `users` collection with `role: "admin"`.
 
-## Running the Application
+8.  **Running the Application**
 
 ### Mobile App (Android Emulator/Device)
 ```bash
 flutter run
+```
 
-Admin Web Panel (Chrome)
-Generated bash
+### Admin Web Panel (Chrome)
+```bash
 flutter run -d chrome
-IGNORE_WHEN_COPYING_START
-content_copy
-download
-Use code with caution.
-Bash
-IGNORE_WHEN_COPYING_END
+```
 
-The admin panel should be accessible. Log in with a user designated with role: "admin" in Firestore.
+9.  **Key Development Phases Completed**
 
-Key Development Phases Completed
+    *   Phase 1-8: Core mobile app setup, map integration, user authentication, basic food truck display, real-time updates, auxiliary pages.
 
-Phase 1-8: Core mobile app setup, map integration, user authentication, basic food truck display, real-time updates, auxiliary pages.
+    *  Phase 9: Comprehensive Web-Based Admin Panel (Food Truck CRUD, Report Review, User Role Management).
 
-Phase 9: Comprehensive Web-Based Admin Panel (Food Truck CRUD, Report Review, User Role Management).
+    *  Phase 10: Essential Mobile App User Features (Search, Filtering by Type, Directions).
 
-Phase 10: Essential Mobile App User Features (Search, Filtering by Type, Directions).
+    *  Phase 11 (formerly 12): Advanced Mobile App Features (Custom Map Styles, User Submissions for new/existing trucks).
 
-Phase 11 (formerly 12): Advanced Mobile App Features (Custom Map Styles, User Submissions for new/existing trucks).
+10.  **Future Enhancements / TODO**
 
-Future Enhancements / TODO
+    *   Admin Panel:
 
-Admin Panel:
+    *   More sophisticated report approval (linking to existing trucks for updates).
 
-More sophisticated report approval (linking to existing trucks for updates).
+    *   UI for managing food truck menus and promotional news.
 
-UI for managing food truck menus and promotional news.
+    *   Advanced user management (suspend, detailed view).
 
-Advanced user management (suspend, detailed view).
+    *   Dashboard analytics.
 
-Dashboard analytics.
+    *   Mobile App:
 
-Mobile App:
+    *   Display menus and promotional news.
 
-Display menus and promotional news.
+    *   User ratings and reviews for food trucks.
 
-User ratings and reviews for food trucks.
+    *   "Open Now" / Operating hours for food trucks and filtering.
 
-"Open Now" / Operating hours for food trucks and filtering.
+    *   User favorites system.
 
-User favorites system.
+    *   Notifications (FCM).
 
-Notifications (FCM).
+    *   Advanced search (by menu items, distance).
 
-Advanced search (by menu items, distance).
+    *   Custom map markers based on food type.
 
-Custom map markers based on food type.
+    *   UI/UX polish and dark mode.
 
-UI/UX polish and dark mode.
+    *   Backend:
 
-Backend:
+    *   Cloud Function for automatic Firestore data cleanup on Firebase Auth user deletion.
 
-Cloud Function for automatic Firestore data cleanup on Firebase Auth user deletion.
+    *   (Optional) Server-side search indexing (e.g., Algolia) for large datasets.
 
-(Optional) Server-side search indexing (e.g., Algolia) for large datasets.
+    *   Contributing
 
-Contributing
+    *   (Add guidelines here if this is an open-source project or if you expect contributions.)
 
-(Add guidelines here if this is an open-source project or if you expect contributions.)
+11.  **Fork the Project**
 
-Fork the Project
+    *   Create your Feature Branch (git checkout -b feature/AmazingFeature)
 
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
+    *   Commit your Changes (git commit -m 'Add some AmazingFeature')
 
-Commit your Changes (git commit -m 'Add some AmazingFeature')
+    *   Push to the Branch (git push origin feature/AmazingFeature)
 
-Push to the Branch (git push origin feature/AmazingFeature)
-
-Open a Pull Request
-
-License
-
-(Specify your project's license, e.g., MIT, Apache 2.0, or proprietary.)
-Distributed under the MIT License. See LICENSE.txt for more information.
-
-Contact
-
-[Your Name/Team Name] - [your.email@example.com]
-Project Link: https://github.com/your_username/your_project_repo
-
-Generated code
-**How to Use This README:**
-
-1.  **Create a file named `README.md`** in the root directory of your Flutter project.
-2.  **Copy and paste the content above** into this file.
-3.  **Customize:**
-    *   Replace placeholders like `[your-repo-url]`, `YOUR_API_KEY_HERE`, `[Your Name/Team Name]`, `[your.email@example.com]`, and the GitHub project link.
-    *   If your setup steps were slightly different, adjust the "Setup and Configuration" section.
-    *   Update the "License" section. If you don't have a `LICENSE.txt` file yet, you might want to add one (e.g., choose a license from [choosealicense.com](https://choosealicense.com/)).
-    *   Review the "Future Enhancements" and tailor it to what you realistically plan to do or what you'd like contributors to focus on.
-    *   Adjust the "Development Team" names in the "About Us" page description within the README if you want to list them here too (though it's primarily for the app itself).
-
-This README provides a good starting point for anyone looking at your project, including your future self!
-IGNORE_WHEN_COPYING_START
-content_copy
-download
-Use code with caution.
-IGNORE_WHEN_COPYING_END
+    *   Open a Pull Request
