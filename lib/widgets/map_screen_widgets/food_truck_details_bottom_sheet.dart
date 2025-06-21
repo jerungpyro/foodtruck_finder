@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // For directions
-import '../../models/food_truck_model.dart'; // Assuming your FoodTruck model is here
+import '../../models/food_truck_model.dart';
+import '../../screens/report_food_truck_screen.dart'; // To navigate to the report screen
 
 class FoodTruckDetailsBottomSheet extends StatelessWidget {
   final FoodTruck truck;
@@ -9,16 +10,10 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
   const FoodTruckDetailsBottomSheet({
     super.key,
     required this.truck,
-    required this.parentContext, // Pass the MapScreen's context
+    required this.parentContext,
   });
 
   Future<void> _launchDirections(double destinationLatitude, double destinationLongitude) async {
-    // This logic can remain here or be passed in as a callback if it needs access to MapScreen's state
-    // For now, keeping it self-contained using Geolocator directly.
-    // Ensure Geolocator is imported if used here, or pass current location from MapScreen.
-    // For simplicity, let's assume it's okay for the bottom sheet to handle this.
-    // (Alternatively, pass a VoidCallback from MapScreen that already has origin info)
-
     String universalMapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=$destinationLatitude,$destinationLongitude&travelmode=driving';
     final Uri url = Uri.parse(universalMapsUrl);
 
@@ -26,7 +21,7 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     } else {
       print('Could not launch $url');
-      if (parentContext.mounted) { // Use parentContext for ScaffoldMessenger
+      if (parentContext.mounted) {
         ScaffoldMessenger.of(parentContext).showSnackBar(
           const SnackBar(content: Text('Could not open map application for directions.')),
         );
@@ -71,7 +66,7 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
         top: 20.0,
         left: 20.0,
         right: 20.0,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0, // Uses bottom sheet's context
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20.0,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -109,6 +104,31 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: const Icon(Icons.edit_note_outlined),
+              label: const Text('Suggest an Update / Report Info'),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                foregroundColor: Theme.of(context).colorScheme.primary,
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                textStyle: const TextStyle(fontSize: 15),
+              ),
+              onPressed: () {
+                Navigator.pop(context); // Close current bottom sheet
+                Navigator.push(
+                  parentContext, // Use parentContext (MapScreen's context) for navigation
+                  MaterialPageRoute(
+                    builder: (context) => ReportFoodTruckScreen(
+                      existingTruck: truck, // Pass the existing truck data
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -116,7 +136,7 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
                   foregroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
               child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              onPressed: () => Navigator.pop(context), // Close bottom sheet
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ],
