@@ -134,18 +134,18 @@ flutter run
 flutter run -d chrome
 ```
 
-9.  **Key Development Phases Completed**
+### Key Development Phases Completed
 
-    *   Phase 1-8: Core mobile app setup, map integration, user authentication, basic food truck display, real-time updates, auxiliary pages.
+   *   Phase 1-8: Core mobile app setup, map integration, user authentication, basic food truck display, real-time updates, auxiliary pages.
 
-    *  Phase 9: Comprehensive Web-Based Admin Panel (Food Truck CRUD, Report Review, User Role Management).
+   *   Phase 9: Comprehensive Web-Based Admin Panel (Food Truck CRUD, Report Review, User Role Management).
 
-    *  Phase 10: Essential Mobile App User Features (Search, Filtering by Type, Directions).
+   *   Phase 10: Essential Mobile App User Features (Search, Filtering by Type, Directions).
 
-    *  Phase 11 (formerly 12): Advanced Mobile App Features (Custom Map Styles, User Submissions for new/existing trucks).
+   *   Phase 11 (formerly 12): Advanced Mobile App Features (Custom Map Styles, User Submissions for new/existing trucks).
    
 
-10.  **Future Enhancements / TODO**
+### Future Enhancements / TODO
     
 Admin Panel:
 
@@ -183,7 +183,7 @@ Backend:
      
    *   (Add guidelines here if this is an open-source project or if you expect contributions.)
 
-11.  **Fork the Project**
+### Fork the Project
     
    *   Create your Feature Branch (git checkout -b feature/AmazingFeature)
 
