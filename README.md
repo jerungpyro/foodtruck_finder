@@ -135,7 +135,7 @@ Phase 10: Mobile App User Features (Search, Type Filtering, Directions).
 
 Phase 11: Advanced Mobile App Features (Map Styles, User Submissions for new/existing trucks).
 
-###💡 Future Enhancements / TODO
+### 💡 Future Enhancements / TODO
 **Admin Panel:**
 
    *   Advanced report approval (linking updates to existing trucks).
