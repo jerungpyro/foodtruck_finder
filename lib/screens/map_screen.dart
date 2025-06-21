@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../models/food_truck_model.dart';
 import 'profile_screen.dart';
-import 'report_food_truck_screen.dart'; // Import the new report screen
+import 'report_food_truck_screen.dart';
 import '../widgets/map_screen_widgets/food_truck_details_bottom_sheet.dart';
 import '../widgets/map_screen_widgets/map_screen_app_bar.dart';
 
@@ -303,13 +303,10 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  // --- Method to navigate to Report Screen ---
   void _navigateToReportTruckScreen() {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ReportFoodTruckScreen()),
-      // We could also pass initial coordinates if implementing map tap to report:
-      // MaterialPageRoute(builder: (context) => ReportFoodTruckScreen(initialCoordinates: _tappedMapCoordinates)),
     );
   }
 
@@ -319,13 +316,13 @@ class _MapScreenState extends State<MapScreen> {
     bool noResultsAfterFilterOrSearch = !_isLoadingFoodTrucks && _filteredFoodTrucks.isEmpty && (_searchQuery.isNotEmpty || _selectedFoodTypeFilter != null);
 
     return Scaffold(
-      appBar: MapScreenAppBar(
+      appBar: MapScreenAppBar( // Instantiating the custom AppBar
         title: widget.title,
         isSearching: _isSearching,
         searchController: _searchController,
         activeFilterDisplay: _selectedFoodTypeFilter,
         onMapStylePressed: _showMapTypeSelectionDialog,
-        onReportTruckPressed: _navigateToReportTruckScreen, // Wire up the callback
+        // onReportTruckPressed is NOT passed here, as it's handled by a FAB now
         onSearchPressed: () {
           if (mounted) setState(() => _isSearching = true);
         },
@@ -358,6 +355,7 @@ class _MapScreenState extends State<MapScreen> {
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
             zoomControlsEnabled: true,
+            padding: const EdgeInsets.only(bottom: 140.0, right: 0.0), // For stacked FABs
           ),
           if (showPrimaryLoader)
             const Center(child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.orange))),
@@ -376,12 +374,31 @@ class _MapScreenState extends State<MapScreen> {
             ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getUserLocationAndCenterMap, tooltip: 'My Location',
-        backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary,
-        child: _isLoadingLocation ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))) : const Icon(Icons.my_location),
+      floatingActionButton: Padding( // For positioning the column of FABs
+        padding: const EdgeInsets.only(bottom: 0), // Adjust this if map padding is not enough
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            FloatingActionButton.extended(
+              heroTag: 'reportTruckFab', // Unique heroTag
+              onPressed: _navigateToReportTruckScreen,
+              tooltip: 'Report New Food Truck',
+              label: const Text('Report'),
+              icon: const Icon(Icons.add_location_alt_outlined),
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
+              foregroundColor: Theme.of(context).colorScheme.onTertiary,
+            ),
+            const SizedBox(height: 12), // Spacing between FABs
+            FloatingActionButton(
+              heroTag: 'myLocationFab', // Unique heroTag
+              onPressed: _getUserLocationAndCenterMap, tooltip: 'My Location',
+              backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary,
+              child: _isLoadingLocation ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))) : const Icon(Icons.my_location),
+            ),
+          ],
+        ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

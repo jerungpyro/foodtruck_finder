@@ -7,7 +7,7 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onProfilePressed;
   final VoidCallback onFilterPressed;
   final VoidCallback onMapStylePressed;
-  final VoidCallback onReportTruckPressed; // New callback for reporting
+  // onReportTruckPressed is intentionally removed from here as it's now a FAB
   final VoidCallback onExitSearch;
   final TextEditingController searchController;
   final String? activeFilterDisplay;
@@ -21,7 +21,6 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.onProfilePressed,
     required this.onFilterPressed,
     required this.onMapStylePressed,
-    required this.onReportTruckPressed, // Added to constructor
     required this.onExitSearch,
     required this.searchController,
     this.activeFilterDisplay,
@@ -83,11 +82,7 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
-          IconButton( // Report Truck Button
-            icon: const Icon(Icons.add_location_alt_outlined),
-            tooltip: 'Report Food Truck',
-            onPressed: onReportTruckPressed, // Use the new callback
-          ),
+          // Report Truck IconButton is NOT here anymore
           IconButton( 
             icon: const Icon(Icons.layers_outlined),
             tooltip: 'Map Style',
