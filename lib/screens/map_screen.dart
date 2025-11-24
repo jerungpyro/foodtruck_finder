@@ -10,6 +10,7 @@ import 'profile_screen.dart';
 import 'report_food_truck_screen.dart';
 import '../widgets/map_screen_widgets/food_truck_details_bottom_sheet.dart';
 import '../widgets/map_screen_widgets/map_screen_app_bar.dart';
+import '../services/nearby_trucks_service.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -42,6 +43,11 @@ class _MapScreenState extends State<MapScreen> {
   List<String> _availableFoodTypes = [];
 
   MapType _currentMapType = MapType.normal;
+
+  // Nearby trucks discovery
+  List<FoodTruck> _newNearbyTrucks = [];
+  bool _showNewTrucksBanner = false;
+  LatLng? _userLocation;
 
   @override
   void initState() {
@@ -116,6 +122,8 @@ class _MapScreenState extends State<MapScreen> {
         setState(() { _allFoodTrucks = fetchedTrucks; _populateAvailableFoodTypes(); });
         _filterFoodTrucks();
         if (mounted) setState(() { _isLoadingFoodTrucks = false; });
+        // Check for nearby trucks when data is loaded
+        _checkForNearbyTrucks();
       }
     }, onError: (error) {
       print("[MapScreen] Error listening to food truck updates: $error");
@@ -190,9 +198,15 @@ class _MapScreenState extends State<MapScreen> {
     try {
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       if (mounted) {
-        setState(() { _currentMapPosition = LatLng(position.latitude, position.longitude); _isLoadingLocation = false; });
+        setState(() { 
+          _currentMapPosition = LatLng(position.latitude, position.longitude);
+          _userLocation = LatLng(position.latitude, position.longitude);
+          _isLoadingLocation = false;
+        });
       }
       _animateToPosition(_currentMapPosition);
+      // Check for nearby trucks after getting location
+      _checkForNearbyTrucks();
     } catch (e) {
       print("[MapScreen] Error getting location: $e");
       if (mounted) {
@@ -206,6 +220,40 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _animateToPosition(LatLng position) async {
     final GoogleMapController controller = await _controllerCompleter.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: position, zoom: 15.0)));
+  }
+
+  Future<void> _checkForNearbyTrucks() async {
+    if (_userLocation == null || _allFoodTrucks.isEmpty) return;
+
+    // Check if enough time has passed since last check
+    final shouldCheck = await NearbyTrucksService.shouldCheckForNewTrucks();
+    if (!shouldCheck) return;
+
+    // Get trucks within 2km radius
+    final nearbyTrucks = NearbyTrucksService.getTrucksNearby(
+      _allFoodTrucks,
+      _userLocation!,
+      2.0, // 2km radius
+    );
+
+    // Detect new trucks
+    final newTrucks = await NearbyTrucksService.detectNewTrucks(nearbyTrucks);
+
+    if (newTrucks.isNotEmpty && mounted) {
+      setState(() {
+        _newNearbyTrucks = newTrucks;
+        _showNewTrucksBanner = true;
+      });
+
+      // Auto-hide banner after 10 seconds
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted) {
+          setState(() {
+            _showNewTrucksBanner = false;
+          });
+        }
+      });
+    }
   }
 
   void _showFilterDialog() {
@@ -618,6 +666,77 @@ class _MapScreenState extends State<MapScreen> {
                     ? 'No food trucks found for "$_searchQuery"${_selectedFoodTypeFilter != null ? " of type \"$_selectedFoodTypeFilter\"" : ""}' 
                     : 'No food trucks found for type "$_selectedFoodTypeFilter"',
                   style: const TextStyle(color: Colors.white, fontSize: 16), textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          // Nearby Trucks Discovery Banner
+          if (_showNewTrucksBanner && _newNearbyTrucks.isNotEmpty)
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.orange[700]!,
+                        Colors.orange[500]!,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.local_shipping_rounded,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              NearbyTrucksService.getNewTrucksSummary(_newNearbyTrucks),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (_newNearbyTrucks.length == 1)
+                              Text(
+                                _newNearbyTrucks.first.type,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 13,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, color: Colors.white),
+                        onPressed: () {
+                          setState(() {
+                            _showNewTrucksBanner = false;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
