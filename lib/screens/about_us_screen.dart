@@ -1,152 +1,447 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutUsScreen extends StatelessWidget {
   const AboutUsScreen({super.key});
 
-  // Helper function to launch URLs
   Future<void> _launchURL(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       print('Could not launch $urlString');
-      // Optionally show a SnackBar to the user here
     }
-  }
-
-  Widget _buildSectionTitle(BuildContext context, String title, {double topPadding = 24.0}) {
-    return Padding(
-      padding: EdgeInsets.only(top: topPadding, bottom: 8.0),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-      ),
-    );
-  }
-
-  Widget _buildTeamMemberTile(BuildContext context, String name) {
-    return ListTile(
-      leading: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
-      title: Text(name),
-      contentPadding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 0),
-    );
-  }
-
-  Widget _buildLinkTile(BuildContext context, IconData icon, String title, String url, {Color? iconColor}) {
-    return ListTile(
-      leading: Icon(icon, color: iconColor ?? Theme.of(context).colorScheme.primary),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      contentPadding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 0),
-      onTap: () => _launchURL(url),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('About FoodTruck Finder'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text(
+          'About FoodTruck Finder',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: colorScheme.primary,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-        children: <Widget>[
-          // --- Original App Description Content ---
-          Center(
-            child: Icon(
-              Icons.fastfood_outlined,
-              size: 60,
-              color: Theme.of(context).colorScheme.primary,
+        padding: EdgeInsets.zero,
+        children: [
+          // Hero Section with Gradient
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colorScheme.primary,
+                  colorScheme.primary.withOpacity(0.8),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          Center(
-            child: Text(
-              'FoodTruck Finder',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 48),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(
+                    Icons.local_shipping_rounded,
+                    size: 64,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'FoodTruck Finder',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Version 1.0.0',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const Center(
-            child: Text(
-              'Version 1.0.0', // Replace with your app version
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+          
+          // Main Content
+          Transform.translate(
+            offset: const Offset(0, -30),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Welcome!',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Our mission is to connect you with the best and most exciting food trucks in your area. Discover new tastes, track your favorites, and never miss out on a delicious street food experience again!',
+                      style: TextStyle(
+                        fontSize: 15,
+                        height: 1.6,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    const SizedBox(height: 28),
+                    
+                    // Features Section
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.star_rounded,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Key Features',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    _buildFeatureItem(
+                      context,
+                      Icons.map_rounded,
+                      'Real-time food truck locations on an interactive map.',
+                    ),
+                    _buildFeatureItem(
+                      context,
+                      Icons.restaurant_rounded,
+                      'Details on food truck types and user reports.',
+                    ),
+                    _buildFeatureItem(
+                      context,
+                      Icons.people_alt_rounded,
+                      'Crowdsourced reporting to keep information fresh and accurate.',
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'Welcome to FoodTruck Finder!',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 10),
-          const Text(
-            'Our mission is to connect you with the best and most exciting food trucks in your area. Discover new tastes, track your favorites, and never miss out on a delicious street food experience again!',
-            style: TextStyle(fontSize: 16, height: 1.5),
-            textAlign: TextAlign.justify,
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'Key Features:',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          const ListTile(
-            leading: Icon(Icons.map_outlined),
-            title: Text('Real-time food truck locations on an interactive map.'),
-            contentPadding: EdgeInsets.zero,
-          ),
-          const ListTile(
-            leading: Icon(Icons.food_bank_outlined),
-            title: Text('Details on food truck types and user reports.'),
-            contentPadding: EdgeInsets.zero,
-          ),
-          const ListTile(
-            leading: Icon(Icons.people_alt_outlined),
-            title: Text('Crowdsourced reporting to keep information fresh and accurate.'),
-             contentPadding: EdgeInsets.zero,
-          ),
-          // --- End of Original App Description Content ---
-
-          const Divider(height: 40, thickness: 1), // Visual separator
-
-          // --- Development Team and Useful Links ---
-          _buildSectionTitle(context, 'Development Team', topPadding: 16.0),
-          const Divider(),
-          _buildTeamMemberTile(context, 'Badrul Muhammad Akasyah'),
-          _buildTeamMemberTile(context, 'Wan Muhammad Azlan'),
-          _buildTeamMemberTile(context, 'Sufyan'),
-          _buildTeamMemberTile(context, 'Azwar Ansori'),
-
-          _buildSectionTitle(context, 'Useful Links'),
-          const Divider(),
-          _buildLinkTile(
-            context,
-            Icons.code,
-            'View Project on GitHub',
-            'https://github.com/YOUR_USERNAME/YOUR_PROJECT_REPO', // Replace
-          ),
-          _buildLinkTile(
-            context,
-            Icons.bug_report,
-            'Report an Issue',
-            'https://github.com/YOUR_USERNAME/YOUR_PROJECT_REPO/issues', // Replace
-            iconColor: Colors.redAccent,
-          ),
-          // --- End of Development Team and Useful Links ---
-
-          const SizedBox(height: 40),
-          Center(
-            child: Text(
-              '© ${DateTime.now().year} FoodTruck Finder. All rights reserved.',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
+          
+          // Development Team Section
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.groups_rounded,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Development Team',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    
+                    _buildTeamMember(context, 'Badrul Muhammad Akasyah'),
+                    _buildTeamMember(context, 'Wan Muhammad Azlan'),
+                    _buildTeamMember(context, 'Sufyan'),
+                    _buildTeamMember(context, 'Azwar Ansori'),
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
+          
+          // Useful Links Section
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(
+                            Icons.link_rounded,
+                            color: colorScheme.primary,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Useful Links',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    
+                    _buildLinkItem(
+                      context,
+                      Icons.code_rounded,
+                      'View Project on GitHub',
+                      'https://github.com/jerungpyro/foodtruck_finder',
+                      colorScheme.primary,
+                    ),
+                    const SizedBox(height: 8),
+                    _buildLinkItem(
+                      context,
+                      Icons.bug_report_rounded,
+                      'Report an Issue',
+                      'https://github.com/jerungpyro/foodtruck_finder/issues',
+                      Colors.red[400]!,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          // Footer
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text(
+                '© ${DateTime.now().year} FoodTruck Finder. All rights reserved.',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[500],
+                ),
+              ),
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureItem(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTeamMember(BuildContext context, String name) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange[100],
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              Icons.person_rounded,
+              color: Theme.of(context).colorScheme.primary,
+              size: 20,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            name,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    String url,
+    Color iconColor,
+  ) {
+    return InkWell(
+      onTap: () => _launchURL(url),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.grey[50],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: iconColor,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.black87,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.grey[400],
+              size: 24,
+            ),
+          ],
+        ),
       ),
     );
   }

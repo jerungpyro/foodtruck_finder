@@ -213,42 +213,139 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       builder: (BuildContext context) {
         String? tempSelectedType = _selectedFoodTypeFilter;
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setDialogState) {
-            return AlertDialog(
-              title: const Text('Filter Food Trucks'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text('Filter by Food Type:', style: TextStyle(fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
-                    if (_availableFoodTypes.isEmpty) const Padding(padding: EdgeInsets.symmetric(vertical: 8.0), child: Text("No types available to filter.")),
-                    if (_availableFoodTypes.isNotEmpty)
-                      DropdownButtonFormField<String>(
-                        decoration: const InputDecoration(border: OutlineInputBorder(), contentPadding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0)),
-                        hint: const Text("All Types"), value: tempSelectedType, isExpanded: true,
-                        items: [
-                          const DropdownMenuItem<String>(value: null, child: Text("All Types")),
-                          ..._availableFoodTypes.map((String type) => DropdownMenuItem<String>(value: type, child: Text(type))).toList(),
-                        ],
-                        onChanged: (String? newValue) => setDialogState(() => tempSelectedType = newValue),
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      child: Icon(
+                        Icons.tune_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Filter Food Trucks',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              actions: <Widget>[
-                TextButton(child: const Text('Cancel'), onPressed: () => Navigator.of(context).pop()),
-                ElevatedButton(
-                  child: const Text('Apply Filters'),
-                  onPressed: () {
-                    if (mounted) setState(() => _selectedFoodTypeFilter = tempSelectedType);
-                    _filterFoodTrucks(); Navigator.of(context).pop();
-                  },
+                const SizedBox(height: 20),
+                const Text(
+                  'Filter by Food Type:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_availableFoodTypes.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.info_outline, color: Colors.grey[600], size: 20),
+                        const SizedBox(width: 12),
+                        Text(
+                          "No types available to filter",
+                          style: TextStyle(color: Colors.grey[600]),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (_availableFoodTypes.isNotEmpty)
+                  StatefulBuilder(
+                    builder: (context, setDialogState) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            prefixIcon: Icon(
+                              Icons.restaurant_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                              size: 22,
+                            ),
+                          ),
+                          hint: const Text("All Types"),
+                          value: tempSelectedType,
+                          isExpanded: true,
+                          items: [
+                            const DropdownMenuItem<String>(
+                              value: null,
+                              child: Text("All Types", style: TextStyle(fontWeight: FontWeight.w500)),
+                            ),
+                            ..._availableFoodTypes.map((String type) {
+                              return DropdownMenuItem<String>(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (String? newValue) {
+                            setDialogState(() => tempSelectedType = newValue);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Apply Filters'),
+                      onPressed: () {
+                        if (mounted) setState(() => _selectedFoodTypeFilter = tempSelectedType);
+                        _filterFoodTrucks();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
                 ),
               ],
-            );
-          }
+            ),
+          ),
         );
       },
     );
@@ -258,48 +355,200 @@ class _MapScreenState extends State<MapScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        MapType selectedTypeInDialog = _currentMapType; 
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              title: const Text('Select Map Style'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    RadioListTile<MapType>(
-                      title: const Text('Normal'), value: MapType.normal, groupValue: selectedTypeInDialog,
-                      onChanged: (MapType? value) { if (value != null) setDialogState(() => selectedTypeInDialog = value); },
+        MapType selectedTypeInDialog = _currentMapType;
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.layers_rounded,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
-                    RadioListTile<MapType>(
-                      title: const Text('Satellite'), value: MapType.satellite, groupValue: selectedTypeInDialog,
-                      onChanged: (MapType? value) { if (value != null) setDialogState(() => selectedTypeInDialog = value); },
-                    ),
-                    RadioListTile<MapType>(
-                      title: const Text('Hybrid'), value: MapType.hybrid, groupValue: selectedTypeInDialog,
-                      onChanged: (MapType? value) { if (value != null) setDialogState(() => selectedTypeInDialog = value); },
-                    ),
-                    RadioListTile<MapType>(
-                      title: const Text('Terrain'), value: MapType.terrain, groupValue: selectedTypeInDialog,
-                      onChanged: (MapType? value) { if (value != null) setDialogState(() => selectedTypeInDialog = value); },
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Map Style',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              actions: <Widget>[
-                TextButton(child: const Text('Cancel'), onPressed: () => Navigator.of(context).pop()),
-                ElevatedButton(
-                  child: const Text('Apply'),
-                  onPressed: () {
-                    if (mounted) setState(() => _currentMapType = selectedTypeInDialog);
-                    Navigator.of(context).pop();
+                const SizedBox(height: 20),
+                StatefulBuilder(
+                  builder: (context, setDialogState) {
+                    return Column(
+                      children: [
+                        _buildMapStyleOption(
+                          context: context,
+                          icon: Icons.map_rounded,
+                          title: 'Normal',
+                          description: 'Standard road map',
+                          mapType: MapType.normal,
+                          selectedType: selectedTypeInDialog,
+                          onChanged: (value) => setDialogState(() => selectedTypeInDialog = value!),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildMapStyleOption(
+                          context: context,
+                          icon: Icons.satellite_alt_rounded,
+                          title: 'Satellite',
+                          description: 'Aerial imagery',
+                          mapType: MapType.satellite,
+                          selectedType: selectedTypeInDialog,
+                          onChanged: (value) => setDialogState(() => selectedTypeInDialog = value!),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildMapStyleOption(
+                          context: context,
+                          icon: Icons.layers_rounded,
+                          title: 'Hybrid',
+                          description: 'Satellite with labels',
+                          mapType: MapType.hybrid,
+                          selectedType: selectedTypeInDialog,
+                          onChanged: (value) => setDialogState(() => selectedTypeInDialog = value!),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildMapStyleOption(
+                          context: context,
+                          icon: Icons.terrain_rounded,
+                          title: 'Terrain',
+                          description: 'Topographic features',
+                          mapType: MapType.terrain,
+                          selectedType: selectedTypeInDialog,
+                          onChanged: (value) => setDialogState(() => selectedTypeInDialog = value!),
+                        ),
+                      ],
+                    );
                   },
                 ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.grey[600]),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text('Apply'),
+                      onPressed: () {
+                        if (mounted) setState(() => _currentMapType = selectedTypeInDialog);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ],
+                ),
               ],
-            );
-          }
+            ),
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildMapStyleOption({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String description,
+    required MapType mapType,
+    required MapType selectedType,
+    required ValueChanged<MapType?> onChanged,
+  }) {
+    final isSelected = selectedType == mapType;
+    return InkWell(
+      onTap: () => onChanged(mapType),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isSelected 
+              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected 
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey[300]!,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                  ? Theme.of(context).colorScheme.primary
+                  : Colors.grey[600],
+              size: 28,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary
+                          : Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle_rounded,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
+              )
+            else
+              Icon(
+                Icons.circle_outlined,
+                color: Colors.grey[400],
+                size: 24,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -374,27 +623,51 @@ class _MapScreenState extends State<MapScreen> {
             ),
         ],
       ),
-      floatingActionButton: Padding( // For positioning the column of FABs
-        padding: const EdgeInsets.only(bottom: 0), // Adjust this if map padding is not enough
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             FloatingActionButton.extended(
-              heroTag: 'reportTruckFab', // Unique heroTag
+              heroTag: 'reportTruckFab',
               onPressed: _navigateToReportTruckScreen,
               tooltip: 'Report New Food Truck',
-              label: const Text('Report'),
-              icon: const Icon(Icons.add_location_alt_outlined),
-              backgroundColor: Theme.of(context).colorScheme.tertiary,
-              foregroundColor: Theme.of(context).colorScheme.onTertiary,
+              elevation: 4,
+              label: const Text(
+                'Report',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              icon: const Icon(Icons.add_location_alt_rounded, size: 22),
+              backgroundColor: const Color(0xFF8B4513),
+              foregroundColor: Colors.white,
             ),
-            const SizedBox(height: 12), // Spacing between FABs
+            const SizedBox(height: 16),
             FloatingActionButton(
-              heroTag: 'myLocationFab', // Unique heroTag
-              onPressed: _getUserLocationAndCenterMap, tooltip: 'My Location',
-              backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary,
-              child: _isLoadingLocation ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, valueColor: AlwaysStoppedAnimation<Color>(Colors.white))) : const Icon(Icons.my_location),
+              heroTag: 'myLocationFab',
+              onPressed: _getUserLocationAndCenterMap,
+              tooltip: 'My Location',
+              elevation: 4,
+              backgroundColor: Colors.white,
+              child: _isLoadingLocation
+                  ? SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    )
+                  : Icon(
+                      Icons.my_location_rounded,
+                      color: Theme.of(context).colorScheme.primary,
+                      size: 26,
+                    ),
             ),
           ],
         ),
