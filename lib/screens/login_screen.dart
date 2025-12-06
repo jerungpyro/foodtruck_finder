@@ -68,7 +68,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
       body: Stack(
@@ -383,15 +382,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-              ],
-            ),
-          ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+                    ],  // End of Column children
+                  ),  // End of Column
+                ),  // End of Form
+              ),  // End of SingleChildScrollView
+            ),  // End of Center
+          ),  // End of SafeArea
+        ],  // End of Stack children
+      ),  // End of Stack body
+    );  // End of Scaffold
   }
 }

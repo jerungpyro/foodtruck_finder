@@ -6,7 +6,6 @@ import '../models/food_truck_model.dart';
 class NearbyTrucksService {
   static const String _lastSeenTrucksKey = 'last_seen_trucks';
   static const String _lastCheckTimeKey = 'last_check_time';
-  static const double _defaultRadiusKm = 2.0; // 2km radius
 
   /// Calculate distance between two coordinates in kilometers
   static double calculateDistance(LatLng point1, LatLng point2) {

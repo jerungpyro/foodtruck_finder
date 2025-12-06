@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // For User
-import 'package:google_maps_flutter/google_maps_flutter.dart'; // For LatLng
 
 import '../../../models/food_truck_model.dart';
 import '../../../services/auth_service.dart'; // To get current admin user
