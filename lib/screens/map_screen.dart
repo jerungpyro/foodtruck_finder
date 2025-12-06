@@ -76,13 +76,19 @@ class _MapScreenState extends State<MapScreen> {
 
   void _populateAvailableFoodTypes() {
     if (!mounted) return;
-    final Set<String> types = {};
+    final Map<String, String> typesMap = {}; // Map to track lowercase -> original case
     for (var truck in _allFoodTrucks) {
-      if (truck.type.isNotEmpty) { types.add(truck.type); }
+      if (truck.type.isNotEmpty) { 
+        String lowerType = truck.type.toLowerCase();
+        // Keep the capitalized version if exists, otherwise use whatever comes first
+        if (!typesMap.containsKey(lowerType) || truck.type[0].toUpperCase() == truck.type[0]) {
+          typesMap[lowerType] = truck.type;
+        }
+      }
     }
     if (mounted) {
       setState(() {
-        _availableFoodTypes = types.toList()..sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
+        _availableFoodTypes = typesMap.values.toList()..sort((a,b) => a.toLowerCase().compareTo(b.toLowerCase()));
       });
     }
   }
