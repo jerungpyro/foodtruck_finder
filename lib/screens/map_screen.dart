@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -11,6 +12,7 @@ import 'report_food_truck_screen.dart';
 import '../widgets/map_screen_widgets/food_truck_details_bottom_sheet.dart';
 import '../widgets/map_screen_widgets/map_screen_app_bar.dart';
 import '../services/nearby_trucks_service.dart';
+import '../widgets/glass_container.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -265,12 +267,15 @@ class _MapScreenState extends State<MapScreen> {
   void _showFilterDialog() {
     showDialog(
       context: context,
+      barrierColor: Colors.black.withOpacity(0.3),
       builder: (BuildContext context) {
         String? tempSelectedType = _selectedFoodTypeFilter;
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Container(
+          backgroundColor: Colors.transparent,
+          child: GlassContainer(
             padding: const EdgeInsets.all(24),
+            blur: 20,
+            opacity: 0.2,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,8 +285,13 @@ class _MapScreenState extends State<MapScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.tune_rounded,
@@ -295,6 +305,7 @@ class _MapScreenState extends State<MapScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                   ],
@@ -332,8 +343,12 @@ class _MapScreenState extends State<MapScreen> {
                     builder: (context, setDialogState) {
                       return Container(
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey[300]!),
+                          color: Colors.white.withOpacity(0.5),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: DropdownButtonFormField<String>(
                           decoration: InputDecoration(
@@ -348,6 +363,7 @@ class _MapScreenState extends State<MapScreen> {
                           hint: const Text("All Types"),
                           value: tempSelectedType,
                           isExpanded: true,
+                          dropdownColor: Colors.white.withOpacity(0.95),
                           items: [
                             const DropdownMenuItem<String>(
                               value: null,
@@ -372,28 +388,38 @@ class _MapScreenState extends State<MapScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
                       onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Apply Filters'),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GlassButton(
                       onPressed: () {
                         if (mounted) setState(() => _selectedFoodTypeFilter = tempSelectedType);
                         _filterFoodTrucks();
                         Navigator.of(context).pop();
                       },
+                      color: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      child: const Text(
+                        'Apply Filters',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -408,12 +434,15 @@ class _MapScreenState extends State<MapScreen> {
   void _showMapTypeSelectionDialog() {
     showDialog(
       context: context,
+      barrierColor: Colors.black.withOpacity(0.3),
       builder: (BuildContext context) {
         MapType selectedTypeInDialog = _currentMapType;
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Container(
+          backgroundColor: Colors.transparent,
+          child: GlassContainer(
             padding: const EdgeInsets.all(24),
+            blur: 20,
+            opacity: 0.2,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -423,8 +452,13 @@ class _MapScreenState extends State<MapScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(10),
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.layers_rounded,
@@ -438,6 +472,7 @@ class _MapScreenState extends State<MapScreen> {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                   ],
@@ -495,27 +530,37 @@ class _MapScreenState extends State<MapScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
                       onPressed: () => Navigator.of(context).pop(),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Apply'),
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.grey[700],
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GlassButton(
                       onPressed: () {
                         if (mounted) setState(() => _currentMapType = selectedTypeInDialog);
                         Navigator.of(context).pop();
                       },
+                      color: Theme.of(context).colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                      child: const Text(
+                        'Apply',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -681,27 +726,42 @@ class _MapScreenState extends State<MapScreen> {
               top: 16,
               left: 16,
               right: 16,
-              child: Material(
-                elevation: 4,
-                borderRadius: BorderRadius.circular(12),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.orange[700]!,
-                        Colors.orange[500]!,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
+              child: GlassContainer(
+                padding: const EdgeInsets.all(18),
+                borderRadius: BorderRadius.circular(20),
+                blur: 25,
+                opacity: 0.25,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.orange[400]!.withOpacity(0.4),
+                    Colors.orange[600]!.withOpacity(0.3),
+                  ],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
-                  child: Row(
+                ],
+                child: Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.3),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.white.withOpacity(0.4),
+                              Colors.white.withOpacity(0.2),
+                            ],
+                          ),
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.3),
+                            width: 1.5,
+                          ),
                         ),
                         child: const Icon(
                           Icons.local_shipping_rounded,
@@ -745,7 +805,6 @@ class _MapScreenState extends State<MapScreen> {
                   ),
                 ),
               ),
-            ),
         ],
       ),
       floatingActionButton: Padding(
@@ -754,45 +813,81 @@ class _MapScreenState extends State<MapScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            FloatingActionButton.extended(
-              heroTag: 'reportTruckFab',
-              onPressed: _navigateToReportTruckScreen,
-              tooltip: 'Report New Food Truck',
-              elevation: 4,
-              label: const Text(
-                'Report',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
-              ),
-              icon: const Icon(Icons.add_location_alt_rounded, size: 22),
-              backgroundColor: const Color(0xFF8B4513),
-              foregroundColor: Colors.white,
-            ),
-            const SizedBox(height: 16),
-            FloatingActionButton(
-              heroTag: 'myLocationFab',
-              onPressed: _getUserLocationAndCenterMap,
-              tooltip: 'My Location',
-              elevation: 4,
-              backgroundColor: Colors.white,
-              child: _isLoadingLocation
-                  ? SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.primary,
+            GestureDetector(
+              onTap: _navigateToReportTruckScreen,
+              child: Tooltip(
+                message: 'Report New Food Truck',
+                child: GlassContainer(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  borderRadius: BorderRadius.circular(30),
+                  blur: 15,
+                  opacity: 0.25,
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF8B4513).withOpacity(0.5),
+                      const Color(0xFF8B4513).withOpacity(0.3),
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF8B4513).withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.add_location_alt_rounded, size: 22, color: Colors.white),
+                      SizedBox(width: 8),
+                      Text(
+                        'Report',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Colors.white,
                         ),
                       ),
-                    )
-                  : Icon(
-                      Icons.my_location_rounded,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 26,
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: _getUserLocationAndCenterMap,
+              child: Tooltip(
+                message: 'My Location',
+                child: GlassContainer(
+                  padding: const EdgeInsets.all(14),
+                  borderRadius: BorderRadius.circular(50),
+                  blur: 15,
+                  opacity: 0.3,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
                     ),
+                  ],
+                  child: _isLoadingLocation
+                      ? SizedBox(
+                          width: 26,
+                          height: 26,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        )
+                      : Icon(
+                          Icons.my_location_rounded,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 26,
+                        ),
+                ),
+              ),
             ),
           ],
         ),
