@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; // For directions
 import '../../models/food_truck_model.dart';
 import '../../screens/report_food_truck_screen.dart'; // To navigate to the report screen
+import '../../theme/app_theme.dart';
 
 class FoodTruckDetailsBottomSheet extends StatelessWidget {
   final FoodTruck truck;
@@ -31,24 +32,38 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
 
   Widget _buildDetailRow(BuildContext context, IconData icon, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 22.0, color: Theme.of(context).colorScheme.onSurfaceVariant),
-          const SizedBox(width: 16.0),
-          Text(
-            "$label: ",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: Icon(icon, size: 20.0, color: AppTheme.primary),
           ),
+          const SizedBox(width: 12.0),
           Expanded(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 16, color: Theme.of(context).colorScheme.onSurface),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: AppTheme.caption.copyWith(
+                    fontSize: 12,
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: AppTheme.bodyLarge.copyWith(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -72,14 +87,30 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(
-            truck.name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppTheme.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
+                child: Icon(
+                  Icons.local_shipping_rounded,
+                  color: AppTheme.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  truck.name,
+                  style: AppTheme.heading2,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           _buildDetailRow(context, Icons.category_outlined, "Type", truck.type),
           if (truck.locationDescription != null && truck.locationDescription!.isNotEmpty)
              _buildDetailRow(context, Icons.description_outlined, "Description", truck.locationDescription!),
@@ -92,10 +123,13 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
               icon: const Icon(Icons.directions_car_filled_outlined),
               label: const Text('Get Directions'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12.0),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                backgroundColor: AppTheme.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14.0),
+                textStyle: AppTheme.button,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(context); // Close bottom sheet using its own context
@@ -103,17 +137,20 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               icon: const Icon(Icons.edit_note_outlined),
-              label: const Text('Suggest an Update / Report Info'),
+              label: const Text('Suggest Update'),
               style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Theme.of(context).colorScheme.primary),
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 10.0),
-                textStyle: const TextStyle(fontSize: 15),
+                side: BorderSide(color: AppTheme.primary, width: 1.5),
+                foregroundColor: AppTheme.primary,
+                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                textStyle: AppTheme.button,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                ),
               ),
               onPressed: () {
                 Navigator.pop(context); // Close current bottom sheet
@@ -129,16 +166,6 @@ class FoodTruckDetailsBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              style: TextButton.styleFrom(
-                  foregroundColor: Theme.of(context).colorScheme.primary,
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0)),
-              child: const Text("CLOSE", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ),
         ],
       ),
     );

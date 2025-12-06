@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart'; // For FirebaseException
 import '../services/auth_service.dart'; // Uses the singleton AuthService
 import 'register_screen.dart';
 import '../widgets/glass_container.dart';
+import '../theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,9 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
           // Gradient Background
           GlassGradientBackground(
             colors: [
-              colorScheme.primary.withOpacity(0.1),
-              Colors.orange[200]!.withOpacity(0.2),
-              Colors.purple[100]!.withOpacity(0.15),
+              AppTheme.primary.withOpacity(0.08),
+              AppTheme.secondary.withOpacity(0.12),
+              AppTheme.accent.withOpacity(0.08),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -117,9 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Welcome Text
                 Text(
                   'Welcome Back!',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: Colors.grey[800],
-                        fontWeight: FontWeight.bold,
+                  style: AppTheme.heading1.copyWith(
                         fontSize: 32,
                       ),
                   textAlign: TextAlign.center,
@@ -127,9 +126,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Sign in to continue finding food trucks',
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 14,
+                  style: AppTheme.bodyMedium.copyWith(
+                    fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -147,10 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Email',
                       hintText: 'Enter your email',
-                      labelStyle: TextStyle(color: Colors.grey[700]),
+                      labelStyle: AppTheme.bodyMedium,
+                      hintStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.textHint),
                       prefixIcon: Icon(
                         Icons.email_rounded,
-                        color: colorScheme.primary,
+                        color: AppTheme.primary,
                         size: 22,
                       ),
                       filled: true,
@@ -202,10 +201,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       hintText: 'Enter your password',
-                      labelStyle: TextStyle(color: Colors.grey[700]),
+                      labelStyle: AppTheme.bodyMedium,
+                      hintStyle: AppTheme.bodyMedium.copyWith(color: AppTheme.textHint),
                       prefixIcon: Icon(
                         Icons.lock_rounded,
-                        color: colorScheme.primary,
+                        color: AppTheme.primary,
                         size: 22,
                       ),
                       suffixIcon: IconButton(
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _obscurePassword 
                               ? Icons.visibility_rounded 
                               : Icons.visibility_off_rounded,
-                          color: Colors.grey[600],
+                          color: AppTheme.textSecondary,
                           size: 22,
                         ),
                         onPressed: () {
@@ -267,19 +267,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     margin: const EdgeInsets.only(bottom: 16),
                     blur: 10,
                     opacity: 0.15,
-                    color: Colors.red[300],
+                    color: AppTheme.error,
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.red[300]!.withOpacity(0.3), width: 1.5),
+                    border: Border.all(color: AppTheme.error.withOpacity(0.3), width: 1.5),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline_rounded, color: Colors.red[700], size: 20),
+                        Icon(Icons.error_outline_rounded, color: AppTheme.error.withOpacity(0.9), size: 20),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             _errorMessage,
-                            style: TextStyle(
-                              color: Colors.red[700],
-                              fontSize: 14,
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.error.withOpacity(0.9),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -338,19 +337,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Divider
                 Row(
                   children: [
-                    Expanded(child: Divider(color: Colors.grey[400])),
+                    Expanded(child: Divider(color: AppTheme.textHint.withOpacity(0.5))),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'OR',
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
+                        style: AppTheme.bodySmall.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    Expanded(child: Divider(color: Colors.grey[400])),
+                    Expanded(child: Divider(color: AppTheme.textHint.withOpacity(0.5))),
                   ],
                 ),
                 const SizedBox(height: 24),
