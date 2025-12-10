@@ -76,70 +76,96 @@ class MapScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       title: Row(
         children: [
-          Icon(Icons.local_shipping_rounded, color: Colors.white, size: 26),
-          const SizedBox(width: 10),
-          const Text(
-            'FoodTruck',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+          if (activeFilterDisplay == null || activeFilterDisplay!.isEmpty) ...[
+            Icon(Icons.local_shipping_rounded, color: Colors.white, size: 24),
+            const SizedBox(width: 8),
+            const Text(
+              'FoodTruck',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.3,
+              ),
             ),
-          ),
+          ],
+          if (activeFilterDisplay != null && activeFilterDisplay!.isNotEmpty)
+            Flexible(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.restaurant_menu,
+                      color: colorScheme.primary,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
+                        activeFilterDisplay!,
+                        style: TextStyle(
+                          color: colorScheme.primary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: onClearActiveFilter,
+                      child: Icon(
+                        Icons.close,
+                        color: colorScheme.primary,
+                        size: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
       actions: [
-        if (activeFilterDisplay != null && activeFilterDisplay!.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  activeFilterDisplay!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                GestureDetector(
-                  onTap: onClearActiveFilter,
-                  child: const Icon(Icons.close_rounded, color: Colors.white, size: 16),
-                ),
-              ],
-            ),
-          ),
         IconButton(
-          icon: const Icon(Icons.layers_rounded, color: Colors.white, size: 24),
+          icon: const Icon(Icons.layers_outlined, color: Colors.white),
+          iconSize: 21,
           tooltip: 'Map Style',
           onPressed: onMapStylePressed,
+          padding: const EdgeInsets.all(6),
+          splashRadius: 20,
         ),
         IconButton(
-          icon: Icon(
-            Icons.tune_rounded,
-            color: Colors.white,
-            size: 24,
-          ),
+          icon: const Icon(Icons.tune, color: Colors.white),
+          iconSize: 21,
           tooltip: 'Filter',
           onPressed: onFilterPressed,
+          padding: const EdgeInsets.all(6),
+          splashRadius: 20,
         ),
         IconButton(
-          icon: const Icon(Icons.search_rounded, color: Colors.white, size: 24),
+          icon: const Icon(Icons.search, color: Colors.white),
+          iconSize: 21,
           tooltip: 'Search',
           onPressed: onSearchPressed,
+          padding: const EdgeInsets.all(6),
+          splashRadius: 20,
         ),
         IconButton(
-          icon: const Icon(Icons.person_rounded, color: Colors.white, size: 24),
+          icon: const Icon(Icons.person_outline, color: Colors.white),
+          iconSize: 21,
           tooltip: 'Profile',
           onPressed: onProfilePressed,
+          padding: const EdgeInsets.all(6),
+          splashRadius: 20,
         ),
       ],
     );

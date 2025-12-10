@@ -1,8 +1,8 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
-/// A glassmorphism container widget with blur effects and transparency
-/// Following Apple's liquid glass design trend for 2025
+import '../theme/app_theme.dart';
+
+/// Modern 2025 container widget with clean shadows and smooth design
 class GlassContainer extends StatelessWidget {
   final Widget child;
   final double? width;
@@ -10,12 +10,11 @@ class GlassContainer extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final BorderRadiusGeometry? borderRadius;
-  final double blur;
-  final double opacity;
   final Color? color;
   final Border? border;
   final List<BoxShadow>? boxShadow;
   final Gradient? gradient;
+  final double? elevation;
 
   const GlassContainer({
     super.key,
@@ -25,68 +24,52 @@ class GlassContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.borderRadius,
-    this.blur = 10.0,
-    this.opacity = 0.15,
     this.color,
     this.border,
     this.boxShadow,
     this.gradient,
+    this.elevation,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedBorderRadius = borderRadius ?? BorderRadius.circular(AppTheme.radiusLarge);
+    final resolvedColor = color ?? AppTheme.surface;
+
     return Container(
       width: width,
       height: height,
       margin: margin,
+      padding: padding,
       decoration: BoxDecoration(
-        borderRadius: borderRadius ?? BorderRadius.circular(20),
-        boxShadow: boxShadow ?? [
+        color: gradient == null ? resolvedColor : null,
+        gradient: gradient,
+        borderRadius: resolvedBorderRadius,
+        border: border,
+        boxShadow: boxShadow ?? (elevation != null ? [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: Colors.black.withOpacity(0.08 * (elevation! / 4)),
+            blurRadius: elevation! * 4,
+            offset: Offset(0, elevation!),
           ),
-        ],
+        ] : AppTheme.cardShadow),
       ),
-      child: ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(20),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: gradient ?? LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  (color ?? Colors.white).withOpacity(opacity),
-                  (color ?? Colors.white).withOpacity(opacity * 0.5),
-                ],
-              ),
-              borderRadius: borderRadius ?? BorderRadius.circular(20),
-              border: border ?? Border.all(
-                color: Colors.white.withOpacity(0.2),
-                width: 1.5,
-              ),
-            ),
-            padding: padding,
-            child: child,
-          ),
-        ),
-      ),
+      child: child,
     );
   }
 }
 
-/// A glassmorphism button with subtle animations
+/// Modern 2025 button with smooth press animation
 class GlassButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final BorderRadiusGeometry? borderRadius;
   final Color? color;
+  final Gradient? gradient;
   final double? width;
   final double? height;
+  final double? elevation;
 
   const GlassButton({
     super.key,
@@ -95,8 +78,10 @@ class GlassButton extends StatefulWidget {
     this.padding,
     this.borderRadius,
     this.color,
+    this.gradient,
     this.width,
     this.height,
+    this.elevation,
   });
 
   @override
@@ -114,7 +99,7 @@ class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStat
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
@@ -139,10 +124,11 @@ class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStat
         child: GlassContainer(
           width: widget.width,
           height: widget.height,
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
-          opacity: 0.2,
+          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          borderRadius: widget.borderRadius ?? BorderRadius.circular(AppTheme.radiusMedium),
           color: widget.color ?? Theme.of(context).colorScheme.primary,
+          gradient: widget.gradient,
+          elevation: widget.elevation ?? AppTheme.elevationMedium,
           child: widget.child,
         ),
       ),
@@ -150,13 +136,15 @@ class _GlassButtonState extends State<GlassButton> with SingleTickerProviderStat
   }
 }
 
-/// A glassmorphism card with enhanced visual depth
+/// Modern 2025 card with clean shadows
 class GlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final VoidCallback? onTap;
   final Color? color;
+  final Gradient? gradient;
+  final double? elevation;
 
   const GlassCard({
     super.key,
@@ -165,6 +153,8 @@ class GlassCard extends StatelessWidget {
     this.margin,
     this.onTap,
     this.color,
+    this.gradient,
+    this.elevation,
   });
 
   @override
@@ -172,25 +162,17 @@ class GlassCard extends StatelessWidget {
     final card = GlassContainer(
       margin: margin,
       padding: padding ?? const EdgeInsets.all(16),
-      borderRadius: BorderRadius.circular(24),
-      opacity: 0.15,
-      blur: 15,
-      color: color,
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.08),
-          blurRadius: 30,
-          offset: const Offset(0, 15),
-          spreadRadius: -5,
-        ),
-      ],
+      borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+      color: color ?? AppTheme.surface,
+      gradient: gradient,
+      elevation: elevation ?? AppTheme.elevationLow,
       child: child,
     );
 
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         child: card,
       );
     }
@@ -199,16 +181,16 @@ class GlassCard extends StatelessWidget {
   }
 }
 
-/// Gradient background with animated subtle shifts
+/// Gradient background for modern 2025 UI
 class GlassGradientBackground extends StatelessWidget {
-  final List<Color> colors;
+  final List<Color>? colors;
   final AlignmentGeometry begin;
   final AlignmentGeometry end;
   final Widget? child;
 
   const GlassGradientBackground({
     super.key,
-    required this.colors,
+    this.colors,
     this.begin = Alignment.topLeft,
     this.end = Alignment.bottomRight,
     this.child,
@@ -221,7 +203,7 @@ class GlassGradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: begin,
           end: end,
-          colors: colors,
+          colors: colors ?? AppTheme.backgroundGradient,
         ),
       ),
       child: child,

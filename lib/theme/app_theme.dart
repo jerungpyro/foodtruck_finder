@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Primary Color Palette
-  static const Color primary = Color(0xFFFF6B35); // Vibrant Orange
+  // Primary Color Palette (vibrant, modern 2025)
+  static const Color primary = Color(0xFFFF6B35);
   static const Color primaryDark = Color(0xFFE55A2B);
-  static const Color primaryLight = Color(0xFFFF8C5A);
-  
+  static const Color primaryLight = Color(0xFFFF8F5C);
+
   // Accent Colors
-  static const Color secondary = Color(0xFFF7931E); // Golden Orange
-  static const Color accent = Color(0xFF4ECDC4); // Teal Accent
+  static const Color secondary = Color(0xFFF7931E);
+  static const Color accent = Color(0xFF00B894);
   
   // Neutral Colors
   static const Color textPrimary = Color(0xFF2D3436);
   static const Color textSecondary = Color(0xFF636E72);
   static const Color textHint = Color(0xFFB2BEC3);
   
-  // Background Colors
+  // Background Colors (clean, modern)
   static const Color background = Color(0xFFF8F9FA);
   static const Color surface = Colors.white;
   static const Color surfaceLight = Color(0xFFFAFBFC);
+  static const List<Color> backgroundGradient = [
+    Color(0xFFFAFBFC),
+    Color(0xFFF0F2F5),
+    Color(0xFFE8EAED),
+  ];
   
   // Status Colors
   static const Color success = Color(0xFF00B894);
@@ -26,15 +31,49 @@ class AppTheme {
   static const Color warning = Color(0xFFFDCB6E);
   static const Color info = Color(0xFF74B9FF);
   
-  // Glass Effect Colors
-  static Color glassBackground = Colors.white.withOpacity(0.15);
-  static Color glassBorder = Colors.white.withOpacity(0.2);
+  // Modern Card & Shadow Styles (2025 trends)
+  static const double elevationLow = 2.0;
+  static const double elevationMedium = 4.0;
+  static const double elevationHigh = 8.0;
+  
+  static LinearGradient buildPrimaryGradient() {
+    return const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        primary,
+        primaryDark,
+      ],
+    );
+  }
+
+  static LinearGradient buildAccentGradient() {
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        primary.withOpacity(0.9),
+        secondary,
+      ],
+    );
+  }
+
+  static LinearGradient buildSurfaceGradient() {
+    return const LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        surface,
+        surfaceLight,
+      ],
+    );
+  }
   
   // Shadows
   static List<BoxShadow> cardShadow = [
     BoxShadow(
       color: Colors.black.withOpacity(0.08),
-      blurRadius: 20,
+      blurRadius: 16,
       offset: const Offset(0, 4),
       spreadRadius: 0,
     ),
@@ -43,9 +82,23 @@ class AppTheme {
   static List<BoxShadow> elevatedShadow = [
     BoxShadow(
       color: Colors.black.withOpacity(0.12),
-      blurRadius: 30,
+      blurRadius: 24,
       offset: const Offset(0, 8),
+      spreadRadius: 0,
+    ),
+  ];
+
+  static List<BoxShadow> floatingShadow = [
+    BoxShadow(
+      color: primary.withOpacity(0.2),
+      blurRadius: 20,
+      offset: const Offset(0, 10),
       spreadRadius: -2,
+    ),
+    BoxShadow(
+      color: Colors.black.withOpacity(0.08),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
     ),
   ];
 

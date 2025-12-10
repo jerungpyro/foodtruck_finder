@@ -13,6 +13,7 @@ import '../widgets/map_screen_widgets/food_truck_details_bottom_sheet.dart';
 import '../widgets/map_screen_widgets/map_screen_app_bar.dart';
 import '../services/nearby_trucks_service.dart';
 import '../widgets/glass_container.dart';
+import '../theme/app_theme.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key, required this.title});
@@ -272,11 +273,18 @@ class _MapScreenState extends State<MapScreen> {
         String? tempSelectedType = _selectedFoodTypeFilter;
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: GlassContainer(
-            padding: const EdgeInsets.all(24),
-            blur: 20,
-            opacity: 0.2,
-            child: Column(
+          child: Card(
+            elevation: AppTheme.elevationMedium,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: AppTheme.buildSurfaceGradient(),
+                borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+              ),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -425,6 +433,7 @@ class _MapScreenState extends State<MapScreen> {
                 ),
               ],
             ),
+            ),
           ),
         );
       },
@@ -434,16 +443,24 @@ class _MapScreenState extends State<MapScreen> {
   void _showMapTypeSelectionDialog() {
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.3),
+      // Dim only the background while keeping the dialog bright
+      barrierColor: Colors.black.withOpacity(0.45),
       builder: (BuildContext context) {
         MapType selectedTypeInDialog = _currentMapType;
         return Dialog(
           backgroundColor: Colors.transparent,
-          child: GlassContainer(
-            padding: const EdgeInsets.all(24),
-            blur: 20,
-            opacity: 0.2,
-            child: Column(
+          child: Card(
+            elevation: AppTheme.elevationMedium,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                gradient: AppTheme.buildSurfaceGradient(),
+                borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+              ),
+              child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -565,6 +582,7 @@ class _MapScreenState extends State<MapScreen> {
                   ],
                 ),
               ],
+            ),
             ),
           ),
         );
@@ -726,37 +744,19 @@ class _MapScreenState extends State<MapScreen> {
               top: 16,
               left: 16,
               right: 16,
-              child: GlassContainer(
+              child: Container(
                 padding: const EdgeInsets.all(18),
-                borderRadius: BorderRadius.circular(20),
-                blur: 25,
-                opacity: 0.25,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.orange[400]!.withOpacity(0.4),
-                    Colors.orange[600]!.withOpacity(0.3),
-                  ],
+                decoration: BoxDecoration(
+                  gradient: AppTheme.buildPrimaryGradient(),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+                  boxShadow: AppTheme.floatingShadow,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.orange.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
                 child: Row(
                     children: [
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.4),
-                              Colors.white.withOpacity(0.2),
-                            ],
-                          ),
+                          color: Colors.white.withOpacity(0.2),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: Colors.white.withOpacity(0.3),
@@ -817,24 +817,13 @@ class _MapScreenState extends State<MapScreen> {
               onTap: _navigateToReportTruckScreen,
               child: Tooltip(
                 message: 'Report New Food Truck',
-                child: GlassContainer(
+                child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                  borderRadius: BorderRadius.circular(30),
-                  blur: 15,
-                  opacity: 0.25,
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF8B4513).withOpacity(0.5),
-                      const Color(0xFF8B4513).withOpacity(0.3),
-                    ],
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.buildPrimaryGradient(),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: AppTheme.elevatedShadow,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF8B4513).withOpacity(0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
@@ -858,18 +847,13 @@ class _MapScreenState extends State<MapScreen> {
               onTap: _getUserLocationAndCenterMap,
               child: Tooltip(
                 message: 'My Location',
-                child: GlassContainer(
+                child: Container(
                   padding: const EdgeInsets.all(14),
-                  borderRadius: BorderRadius.circular(50),
-                  blur: 15,
-                  opacity: 0.3,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.buildSurfaceGradient(),
+                    borderRadius: BorderRadius.circular(50),
+                    boxShadow: AppTheme.elevatedShadow,
+                  ),
                   child: _isLoadingLocation
                       ? SizedBox(
                           width: 26,
